@@ -1,0 +1,21 @@
+FROM python:3.11
+
+# 安装 OpenCV 所需库
+RUN apt-get update && apt-get install -y libgl1-mesa-glx
+
+# 设置工作目录
+WORKDIR /app
+
+# 拷贝 requirements.txt 并安装依赖（使用清华源）
+COPY requirements.txt ./
+RUN python -m pip install --upgrade pip && \
+    pip install -i https://pypi.tuna.tsinghua.edu.cn/simple --timeout 100 --retries 5 --no-cache-dir -r requirements.txt
+
+# 拷贝代码
+COPY road_property_rightsmodel/ /app/road_property_rightsmodel/
+
+# 切换到模型目录运行主程序
+WORKDIR /app/road_property_rightsmodel
+CMD ["python", "main.py"]
+
+

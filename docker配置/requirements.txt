@@ -1,0 +1,9 @@
+pandas
+Pillow
+requests
+opencv-python==4.5.5.64
+numpy==1.26.4
+flask
+requests
+dmPython
+openpyxl

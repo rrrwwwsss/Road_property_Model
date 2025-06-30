@@ -1,0 +1,205 @@
+from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
+from 整合数据 import get_data
+from 摄像头截帧 import capture_frame_from_camera
+from datetime import datetime, timedelta
+import os
+from PIL import Image
+import numpy as np
+from 配置 import *
+import csv
+
+
+def write_to_csv(file_path, data):
+    # 定义 CSV 文件的表头
+    fieldnames = ["工单编号", "违法类型", "发生地点", "发生时间", "处理状态", "处理人", "path", "处理备注"]
+
+    # 检查文件是否存在，如果不存在则写入表头
+    try:
+        with open(file_path, mode='x', newline='', encoding='utf-8') as csvfile:  # 'x' 模式会创建新文件
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()  # 写入表头
+    except FileExistsError:
+        pass  # 如果文件已存在，则跳过表头写入
+    # 往太极传数据
+    print("开始往太极传数据")
+    get_data(data)
+    print("写入数据到本地")
+    # 追加写入数据
+    with open(file_path, mode='a', newline='', encoding='utf-8') as csvfile:  # 'a' 模式追加写入
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writerow(data)  # 写入一行数据，data是字典
+def process_images(
+        the_path,
+        action,
+        monitor_point,
+        output_folder="output",
+        camera_id="",
+        image_extensions=('.jpg', '.jpeg', '.png', '.bmp', '.webp')
+):
+    """
+    处理图像数据（支持路径/文件夹/实时图像变量）
+
+    Args:
+        the_path: 图片路径/文件夹路径/图像对象（PIL.Image/numpy数组）
+        question: 自定义检测问题描述
+        monitor_point: 监控点位标识符（用于文件命名）
+        output_folder: 保存结果的文件夹路径（默认"output"）
+        image_extensions: 支持的图片格式扩展名
+        camera_id : 摄像头id
+    """
+    action_name = list(action.keys())[0]
+    # question: 自定义检测问题描述
+    question = action[action_name]
+    # 创建输出目录
+    os.makedirs(output_folder, exist_ok=True)
+
+    # 处理输入类型
+    image_list = []
+    if isinstance(the_path, (Image.Image, np.ndarray)):
+        image_list.append((the_path, None))  # 仅存储图像数据
+    elif isinstance(the_path, str):
+        if os.path.isdir(the_path):
+            for f in os.listdir(the_path):
+                ext = os.path.splitext(f)[1].lower()
+                if ext in image_extensions:
+                    image_list.append((None, os.path.join(the_path, f)))
+        elif os.path.isfile(the_path):
+            ext = os.path.splitext(the_path)[1].lower()
+            if ext in image_extensions:
+                image_list.append((None, the_path))
+        else:
+            raise ValueError(f"路径不存在：{the_path}")
+    else:
+        raise TypeError("输入类型必须是路径或图像对象")
+
+    # 检查有效输入
+    if not image_list:
+        print(f"错误：未找到有效图像数据（支持格式：{', '.join(image_extensions)}）")
+        return
+
+    print(f"发现 {len(image_list)} 个图像需要处理...")
+
+    # 处理每个图像
+    matched_count = 0
+    for idx, (image_data, source_path) in enumerate(image_list, 1):
+        print(f"\n处理第 {idx}/{len(image_list)} 个图像...")
+        # 加载图像
+        if image_data is not None:
+            image = image_data
+        else:
+            image = Image.open(source_path)
+
+        # 调用模型识别模块输入提示词进行图像的识别，返回识别结果output_text
+        from 模型识别_docker import pattern_recognition
+        output_text = pattern_recognition(question, image)
+
+        result_dict = safe_json_parse(output_text)
+
+        def validate_boxes(result_dict, min_width=10, min_height=10):
+            print("模型结果：", result_dict)
+            boxes = result_dict.get("bounding_boxes", [])
+            all_invalid = True  # 假设一开始全都无效
+
+            for box in boxes:
+                try:
+                    xmin, ymin, xmax, ymax = box
+                    width = xmax - xmin
+                    height = ymax - ymin
+
+                    if width >= min_width and height >= min_height:
+                        all_invalid = False  # 只要有一个合法，就标记为不全无效
+                        print(f"第框：{box}图像匹配成功")
+                        break
+                except Exception as e:
+                    print(f"处理 box {box} 时出错：{e}")
+                    continue  # 出错的框跳过，不影响其他框判断
+
+            if all_invalid and boxes:  # 只有 boxes 不为空且全部都不合格才改为 no
+                result_dict["result"] = "no"
+                print("所有框都无效，已标记为 no")
+
+            return result_dict
+        result_dict = validate_boxes(result_dict)
+        final_answer = result_dict.get("result", "不存在")
+        print(f"检测结果：{final_answer}")
+        # 尝试解析 JSON
+
+        # result_dict = json.loads(output_text)
+        # final_answer = result_dict.get("result", "no")
+        # print(f"检测结果：{final_answer}")
+
+        # 处理阳性结果
+        if final_answer == "yes":
+            current_time = datetime.now()
+            future_time = current_time + timedelta(minutes=10, seconds=52)
+            # 生成时间戳文件名
+            timestamp = future_time.strftime("%Y%m%d_%H%M%S")
+            filename = f"camera_{camera_id}_{timestamp}.jpg"
+            output_path = os.path.join(output_folder, filename)
+
+            # 绘制边界框
+            original_width, original_height = image.size
+            normalized_boxes = result_dict.get("bounding_boxes")
+
+            if not normalized_boxes:
+                print("没有 bounding_boxes，直接跳出循环")
+                break
+            rescaled_boxes = rescale_bounding_boxes(
+                normalized_boxes,
+                original_width,
+                original_height
+            )
+            output_image = draw_bounding_boxes(image, rescaled_boxes)
+
+            # 保存结果
+            csv_file_path = RESULT_PATH
+            output_image.save(output_path)
+            # 提取出linux实际的存储路径（不是dockers路径）
+            last_part = os.path.basename(output_folder)
+            output_path = os.path.join(LINUX_PIC_PAT + last_part, filename)
+            print(f"★ 发现目标，已保存至 linux存放路径：{output_path}")
+            matched_count += 1
+            the_type = action_name
+            data = {
+                "工单编号": filename,
+                "违法类型": the_type,
+                "发生地点": monitor_point,
+                "发生时间": timestamp,
+                "处理状态": "待处理",
+                "处理人": "执法员",
+                "path": output_path,
+                "处理备注": "无备注"
+            }
+            write_to_csv(csv_file_path, data)
+    print("\n处理完成。")
+    print(f"共发现 {matched_count} 个符合检测条件的图像")
+    print(f"结果保存路径：{os.path.abspath(output_folder)}")
+def poll_cameras(camera_list, question, output_folder):
+    """
+    轮询监控摄像头并处理图像。
+
+    参数：
+        camera_list (list): 包含摄像头信息的列表，每个元素是一个字典，包含以下键：
+            - "camera_id": 摄像头 ID。
+            - "monitor_point": 监控点名称。
+        question (str): 当前需要处理的问题类型（例如 "wajue_question"）。
+        output_folder (str): 输出文件夹路径，用于保存处理后的图像。
+    """
+    print("\n占掘路、工标、井盖、悬挂物识别...")
+
+    for camera in camera_list:
+        camera_id = camera.get("camera_id")
+        monitor_point = camera.get("monitor_point")
+
+        if not camera_id or not monitor_point:
+            print(f"跳过无效的摄像头配置: {camera}")
+            continue
+
+        # 获取摄像头的一帧图像
+        frame = capture_frame_from_camera(camera_id)
+        if frame is None:
+            print(f"网络问题，无法从摄像头 {camera_id} 获取图像")
+            continue
+
+        # 处理图像并保存到指定输出文件夹
+        process_images(frame, question, output_folder=output_folder, monitor_point=monitor_point, camera_id=camera_id)
