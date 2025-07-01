@@ -99,12 +99,21 @@ def write_to_csv(data):
 
     # 读取堆放物品摆摊两个违法行为临时 SQLite 数据库表
     wupin_tanwei_pd = pd.read_sql_query("SELECT * FROM wupin_tanwei", conn)
-    #TODO 1.筛选发生地点一致的元组
+    #TODO 1.筛选发生地点、违法类型一致的元组
     wupin_tanwei_pd = wupin_tanwei_pd[wupin_tanwei_pd["发生地点"] == data["发生地点"]]
 
-    print("发生地点一致的行：",wupin_tanwei_pd)
+    # print("发生地点一致的行：",wupin_tanwei_pd)
     if wupin_tanwei_pd.empty:
         print("没有发生地点一致的记录")
+        # 写入临时文件
+        write_to_sqlite(data)
+        return "文件已写入临时表"
+
+    wupin_tanwei_pd = wupin_tanwei_pd[wupin_tanwei_pd["违法类型"] == data["违法类型"]]
+
+    # print("违法类型一致的行：",wupin_tanwei_pd)
+    if wupin_tanwei_pd.empty:
+        print("没有违法类型一致的记录")
         # 写入临时文件
         write_to_sqlite(data)
         return "文件已写入临时表"

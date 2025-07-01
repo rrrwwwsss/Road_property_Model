@@ -62,7 +62,6 @@ MODEL_SERVE_URL = "http://htc-qwen2vl:8000/generate"  # qwen2vl服务地址
 # ]
 
 duifang_list = [
-    {"camera_id": 11000000001317480152, "monitor_point": "G101京沈线K22+290上行火神营交调站"},
     {"camera_id": 11000000001317193402, "monitor_point": "G101京沈线K39+350下行富各庄"},
     {"camera_id": 11000000001314706001, "monitor_point": "S201通顺路K22+000上行燕京桥下"},
     {"camera_id": 11000000001319399586, "monitor_point": "S203顺密路K17+400下行木林道班"},
@@ -76,7 +75,6 @@ duifang_list = [
     {"camera_id": 11000000001312966376, "monitor_point": "G103京滨线K24+680张采路口"},
 ]
 baitan_list = [
-    {"camera_id": 11000000001317480152, "monitor_point": "G101京沈线K22+290上行火神营交调站"},
     {"camera_id": 11000000001317193402, "monitor_point": "G101京沈线K39+350下行富各庄"},
     {"camera_id": 11000000001314706001, "monitor_point": "S201通顺路K22+000上行燕京桥下"},
     {"camera_id": 11000000001319399586, "monitor_point": "S203顺密路K17+400下行木林道班"},
