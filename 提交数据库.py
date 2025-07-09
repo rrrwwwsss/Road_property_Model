@@ -14,7 +14,7 @@ def insert_object(obj: Any, table_name: str):
     placeholders = ', '.join(['?'] * len(data))
     values = list(data.values())
 
-    sql = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+    sql = f"INSERT INTO offsite.{table_name} ({columns}) VALUES ({placeholders})"
     print("sql",sql)
     conn = dmPython.connect(
         user=DB_CONFIG['user'],
@@ -149,14 +149,14 @@ def insert_database(data):
 
 if __name__ == '__main__':
     data = {
-        "TJ_NAME": "占用、挖掘公路行为:是指未依法批准或者不按批准内容实施，在公路路面、路肩、边沟或其附属用地上进行占用或开挖作业的行为。此类行为不仅损害公路设施完整性，还可能影响交通安全和通行效率。",#违法行为描述
+        "TJ_NAME": "摆设摊位行为：是指在公路及其用地范围内擅自设置售卖摊位，占用道路资源，扰乱正常交通秩序，存在较大安全与管理风险。",#违法行为描述
         "MEASURE": "C1900100", #职权编码
         "UNIT_CODE": "110113",#辖区编码
         "工单编号": "G101京沈线K39+350下行富各庄_20250517_092339.jpg",
-        "违法类型": "擅自占用、挖掘公路",
+        "违法类型": "摆设摊位",
         "发生地点": "G101京沈线K39+350下行富各庄",
         "发生时间": "20250517_092339",
-        "图片路径": "http://10.212.160.162:5000/preview/wajue/G101京沈线K39+350下行富各庄_20250517_092339.jpg",
-        "OffsiteRule_id": "",
+        "图片路径": "http://10.212.160.162:5000/preview/baitan/camera_11000000001317193402_20250701_190708.jpg",
+        "OffsiteRule_id": "792409a397d04c3a9252d3f61f0b91fc",
     }
     insert_database(data)

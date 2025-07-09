@@ -32,9 +32,9 @@ sys.stdout.reconfigure(line_buffering=True)
 # Output format: Please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 size of the image. Otherwise, return: {"result": "no"}.
 # """
 wajue_question = """
-Role: You are an intelligent assistant capable of accurately identifying road excavation activities in images. Your task is to detect road excavation activities in the images and return the positions of these activities in the images.
-Task: Please analyze the image and determine whether there are ongoing road excavation activities. These activities must include excavation activities and construction obstacles, and both must be present simultaneously to be recognized! The key is to detect the actual construction and excavation actions, rather than vehicles and machinery. Ignore normal large vehicles, pedestrians, and road obstacles.
-Note: If you are unsure, always return "no" instead of making a wrong judgment! 
+Role: You are an intelligent assistant capable of accurately identifying road occupation and excavation activities in images. Your task is to detect the road occupation and excavation activities in the image and return the positions of these activities in the image.
+Task: Please analyze the image and determine whether there are any ongoing road occupation or excavation activities. These activities must include occupation, excavation actions, and construction obstacles, and both must exist simultaneously to be recognized! The focus is on detecting the actual construction and actions, rather than vehicles and machinery. Ignore normal vehicles, pedestrians, buildings, and road obstacles.
+Note: If you are unable to identify due to lighting or camera issues, please return 'no'. If you are unsure, always return "no" instead of making a wrong judgment!
 """
 # 井盖缺失
 jinggai_question = """
@@ -51,9 +51,9 @@ You are an intelligent assistant capable of accurately identifying instances of 
 # Output format: If non-road marking behavior is detected, please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 image size. Otherwise, please return: {"result": "no"}.
 # """
 gongbiao_question = """
-Role: You are an intelligent assistant capable of accurately identifying instances of non-standard road signs being placed on roads or within road-related areas. Your task is to detect the presence of such non-standard road signs and return their positions within the image. 
-Task: Please analyze the image and determine whether any non-road signs are set on the road or within the road area. These include: banners, billboards, private signs, or any other signs that are clearly not set by the traffic management department. Please ignore pedestrians, vehicles (including parked vehicles), and legal road accessories (such as lamp posts, traffic signs, monitoring poles, guardrails, etc.). 
-Note: If an off-road sign is detected, please analyze the text on it and recheck whether it is indeed an off-road sign. If you are unable to clearly see the content on the sign due to camera or lighting issues, please return "no" to avoid incorrect judgment. If the sign is clearly part of an official traffic facility, also return "no".
+Role: You are an intelligent assistant capable of accurately identifying non-road signs placed on roads or within road-related areas. Your task is to detect the presence of such non-standard road signs and return their positions in the image.
+Task: Please analyze the image to determine if any non-road signs are set on or within the roads. These include: privately set banners, billboards, or any other signs that are clearly not set by the traffic management department. Please ignore legal road-related facilities (such as street lamps, traffic signs, monitoring poles, speed limit signs, etc.).
+Note: If the content on the sign cannot be clearly seen due to camera or lighting issues, please return "No".
 """
 # 设置悬挂物
 # xuangua_question = """
@@ -66,7 +66,8 @@ Note: If an off-road sign is detected, please analyze the text on it and recheck
 # Output format: If illegal items are detected hanging above the road or within the road area, please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 image size. Otherwise, please return: {"result": "no"}.
 # """
 xuangua_question = """
-You are an intelligent assistant capable of accurately identifying instances of illegal items being hung above roads or within the road area. Your task is to detect the presence of non-standard, illegal hanging objects and return their positions within the image. Analyze the image and determine if there are any illegal items hung above the road, such as banners, ropes, decorations, or other non-road infrastructure objects. If the hanging object clearly belongs to an official facility, return "no". Ignore pedestrians, vehicles (including parked vehicles), and legal road accessories (such as traffic signals, traffic signs, lamp posts, surveillance cameras, traffic guidance devices, etc.). 
+Role: You are an intelligent assistant capable of accurately identifying instances of illegal items being hung above roads or within the road area. Your task is to detect the presence of non-standard and illegal hanging objects and return their positions in the image. 
+Task: Analyze the image and determine if there are any illegal items suspended above the road, such as banners, ropes, decorations, or other non-road infrastructure objects. Ignore pedestrians, vehicles (including parked vehicles), and legal road accessories (such as traffic signals, traffic signs, lamp posts, surveillance cameras, traffic guidance devices, etc.).
 """
 # 堆放物品
 # wupin_question = """
@@ -84,9 +85,9 @@ You are an intelligent assistant capable of accurately identifying instances of 
 # Otherwise, return {"result": "no"}.
 # """
 wupin_question = """
-Role: You are an intelligent assistant capable of accurately identifying the act of stacking items on the roads or within the road land area in an image. Your task is to detect whether there are any illegal stacking or placement of items (such as bricks, buckets, boxes, construction materials, etc.) in the image, and return the positions of these items in the image. 
-Task: Analyze the image and determine if there are any items piled up on the road or within the road area. These items should clearly not be vehicles or pedestrians, such as construction materials, tools, debris, stored items, etc. Please ignore pedestrians, vehicles (including parked vehicles), and legal road accessories (such as traffic signs, lamp posts, guardrails, etc.). 
-Note: If you are unsure whether the item is illegally piled up, please definitely return "no" to avoid making a wrong judgment. If the item is clearly part of the contents during transportation (such as being loaded on a truck), also return "no".
+Role: You are an intelligent assistant capable of accurately identifying the behavior of piling up items on the road or within the road area in images. 
+Task: Please analyze the image to determine if there are any items piled up or placed on the road or within the road area. The focus is on identifying actual stacking or placement of items, rather than incidental objects such as parked vehicles or pedestrians. 
+If you are not sure whether this behavior belongs to piling up items, please return 'no' to avoid misjudgment.
 """
 # 摆设摊位
 # baitan_question = """
@@ -154,11 +155,11 @@ def updata_dianList(action):
     return unique_list
 def run_loop():
     wajue_question_action = {'擅自占用、挖掘公路': wajue_question+model_result}
-    gongbiao_action = {'设置非公路标志': gongbiao_question+model_result}
-    jinggai_action = {'井盖移动或缺失': jinggai_question+model_result}
-    xuangua_action = {'利用附属设施悬挂物品': xuangua_question+model_result}
-    duifang_action = {'堆放物品': wupin_question+model_result}
-    baitan_action = {'摆设摊位': baitan_question+model_result}
+    gongbiao_action = {'在公路用地范围内设置公路标志以外的其他标志': gongbiao_question+model_result}
+    jinggai_action = {'在公路范围内擅自移动井盖': jinggai_question+model_result}
+    xuangua_action = {'遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全': xuangua_question+model_result}
+    duifang_action = {'在公路上及公路用地范围内堆放物品': wupin_question+model_result}
+    baitan_action = {'在公路上及公路用地范围内摆摊设点': baitan_question+model_result}
     # 在模型运行前,先更新摄像头点位:id列表
 
     try:
@@ -215,5 +216,5 @@ if __name__ == '__main__':
     while True :
         run_loop()
         print("等待5秒后继续下一轮操作...\n")
-        time.sleep(600)  # 等待5秒
+        time.sleep(300)  # 等待5秒
 

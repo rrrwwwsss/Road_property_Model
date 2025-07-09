@@ -22,7 +22,7 @@ def clear_begin():
     while True:
         try:
             print("开始清理图片", flush=True)
-            clear_old_files(YUANTU_PATH, days=30)
+            clear_old_files(YUANTU_PATH, days=10)
             print("清理完成", flush=True)
         except Exception as e:
             print("清理过程中出现异常：", flush=True)

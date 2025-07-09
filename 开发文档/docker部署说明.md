@@ -25,6 +25,7 @@ htc/highway_property是镜像名 250606是标签
 ### 1.实时查看日志
 ```bash
 docker logs -f debris-detector
+docker logs -f --tail 100 debris-detector
 ```
 - `-f` 表示 *follow*，会实时输出容器的新日志，类似 `tail -f`。
 

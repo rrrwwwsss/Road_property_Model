@@ -1,3 +1,8 @@
+import json
+import sqlite3
+
+import pandas as pd
+
 from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
 from 整合数据 import get_data
 from 摄像头截帧 import capture_frame_from_camera
@@ -8,26 +13,94 @@ import numpy as np
 from 配置 import *
 import csv
 
+def write_to_sqlite(data):
+    conn = sqlite3.connect(TEMPORARY_RECORD)
+    cursor = conn.cursor()
 
+    placeholders = ', '.join(['?'] * len(data))
+    keys = ', '.join(data.keys())
+    values = list(data.values())
+    # 把传入数据库的值转化为安全的字符串
+    def safe_sql_value(v):
+        import numpy as np
+        import pandas as pd
+        if isinstance(v, (dict, list)):
+            return json.dumps(v, ensure_ascii=False)  # 转为 JSON 字符串
+        elif isinstance(v, (np.integer, np.floating)):
+            return v.item()
+        elif pd.isna(v):
+            return None
+        return v
+
+    safe_values = [safe_sql_value(v) for v in values]
+    cursor.execute(f"INSERT INTO sixiang_weifa ({keys}) VALUES ({placeholders})", safe_values)#placeholders：占位符字符串，表示参数位,用？表示。 safe_values：实际的值，传给 ?
+    conn.commit()
+    conn.close()
 def write_to_csv(file_path, data):
-    # 定义 CSV 文件的表头
-    fieldnames = ["工单编号", "违法类型", "发生地点", "发生时间", "处理状态", "处理人", "path", "处理备注"]
+    # 创建SQLite数据库,存储临时监测数据
+    conn = sqlite3.connect(TEMPORARY_RECORD)
+    cursor = conn.cursor()
 
-    # 检查文件是否存在，如果不存在则写入表头
-    try:
-        with open(file_path, mode='x', newline='', encoding='utf-8') as csvfile:  # 'x' 模式会创建新文件
+    # 如果表不存在则创建
+    cursor.execute("""
+                   CREATE TABLE IF NOT EXISTS sixiang_weifa
+                   (
+                       工单编号 TEXT,
+                       违法类型 TEXT,
+                       发生地点 TEXT,
+                       发生时间 TEXT,
+                       处理状态 TEXT,
+                       处理人 TEXT,
+                       path TEXT,
+                       处理备注 TEXT
+                   )
+                   """)
+    conn.commit()
+    # 读取四项违法行为临时 SQLite 数据库表
+    wupin_tanwei_pd = pd.read_sql_query("SELECT * FROM sixiang_weifa", conn)
+
+    # 将 data["发生时间"] 转换为 datetime 类型
+    data_time = datetime.strptime(data["发生时间"], "%Y%m%d_%H%M%S")
+
+    # 假设 wupin_tanwei_pd 是一个 pandas DataFrame，包含了发生时间、发生地点、违法类型等字段
+    # 需要将 wupin_tanwei_pd 中的 发生时间 转换为 datetime 类型
+    wupin_tanwei_pd["发生时间"] = pd.to_datetime(wupin_tanwei_pd["发生时间"], format="%Y%m%d_%H%M%S")
+
+    # 计算 8 小时的时间差
+    time_diff = timedelta(hours=8)
+
+    # 筛选条件：发生地点、违法类型一致，且发生时间在 8 小时以内
+    filtered_df = wupin_tanwei_pd[
+        (wupin_tanwei_pd["发生地点"] == data["发生地点"]) &
+        (wupin_tanwei_pd["违法类型"] == data["违法类型"]) &
+        # 发生时间列各元组 - data[发生时间]（datetime类型） 的绝对值要小于8
+        ((wupin_tanwei_pd["发生时间"] - data_time).abs() <= time_diff)
+        ]
+
+    # 如果临时数据库里没有发生地点、违法类型一致，且发生时间在 8 小时以内的行为，则执行上传逻辑
+    if filtered_df.empty:
+        # 定义 CSV 文件的表头
+        fieldnames = ["工单编号", "违法类型", "发生地点", "发生时间", "处理状态", "处理人", "path", "处理备注"]
+
+        # 检查文件是否存在，如果不存在则写入表头
+        try:
+            with open(file_path, mode='x', newline='', encoding='utf-8') as csvfile:  # 'x' 模式会创建新文件
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()  # 写入表头
+        except FileExistsError:
+            pass  # 如果文件已存在，则跳过表头写入
+        # 往太极传数据
+        print("开始往太极传数据")
+        get_data(data)
+        print("写入数据到本地")
+        # 追加写入数据
+        with open(file_path, mode='a', newline='', encoding='utf-8') as csvfile:  # 'a' 模式追加写入
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()  # 写入表头
-    except FileExistsError:
-        pass  # 如果文件已存在，则跳过表头写入
-    # 往太极传数据
-    print("开始往太极传数据")
-    get_data(data)
-    print("写入数据到本地")
-    # 追加写入数据
-    with open(file_path, mode='a', newline='', encoding='utf-8') as csvfile:  # 'a' 模式追加写入
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writerow(data)  # 写入一行数据，data是字典
+            writer.writerow(data)  # 写入一行数据，data是字典
+        # 写入临时数据库
+        write_to_sqlite(data)
+    else:
+        return "8小时内已上传过该行为"
 def process_images(
         the_path,
         action,
@@ -96,9 +169,29 @@ def process_images(
         result_dict = safe_json_parse(output_text)
 
         def validate_boxes(result_dict, min_width=10, min_height=10):
+            """
+            验证给定的边界框（bounding boxes）是否有效。
+            1. 每个框的宽度和高度都需要大于等于指定的最小值（默认为 10）。
+            2. 如果框的数量超过 4 个，视为无效。
+            3. 如果所有框都无效，则在结果字典中设置 "result": "no"。
+
+            参数：
+            result_dict (dict): 包含边界框和其他信息的字典。
+            min_width (int): 最小框宽度（默认为 10）。
+            min_height (int): 最小框高度（默认为 10）。
+
+            返回：
+            dict: 更新后的结果字典，可能包含 "result": "no"。
+            """
             print("模型结果：", result_dict)
             boxes = result_dict.get("bounding_boxes", [])
             all_invalid = True  # 假设一开始全都无效
+
+            # 如果框的数量超过 4 个，立即视为无效
+            if len(boxes) > 4:
+                result_dict["result"] = "no"
+                print("框的数量超过 4 个，已标记为 no")
+                return result_dict
 
             for box in boxes:
                 try:
@@ -149,6 +242,22 @@ def process_images(
                 original_width,
                 original_height
             )
+
+            # 保存这个没标框的违法图像
+            # 假设 image 是你的PIL Image对象
+            save_dir = './shibie_yuantu/'+output_folder.rsplit('/', 1)[-1] #提取出违法行为保存的路径
+
+            # 判断文件夹是否存在，不存在就创建
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+
+            # 拼接保存路径，文件名可以自己定，比如用“output.png”
+            save_path = os.path.join(save_dir, filename)
+
+            # 保存图片
+            image.save(save_path)
+            print(f"图片已保存到 {save_path}")
+            # 给图像标框
             output_image = draw_bounding_boxes(image, rescaled_boxes)
 
             # 保存结果
@@ -168,7 +277,7 @@ def process_images(
                 "处理状态": "待处理",
                 "处理人": "执法员",
                 "path": output_path,
-                "处理备注": "无备注"
+                "处理备注": "无备注",
             }
             write_to_csv(csv_file_path, data)
     print("\n处理完成。")

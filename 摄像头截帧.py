@@ -16,8 +16,29 @@ def close_video(invite_id):
     参数:
         invite_id (str): 播放句柄。
     """
+
     url = f"{BASE_URL}/closeVideo.action"
-    params = {"inviteId": invite_id}
+
+
+    params = {
+        # "inviteId": invite_id,
+        "playType": 1
+    }
+    requests.get(url, params=params, verify=False)
+    print("录像回放已关闭")
+
+
+    params = {
+        # "inviteId": invite_id,
+        "playType": 0
+    }
+    requests.get(url, params=params, verify=False)
+    print("实时视频已关闭")
+
+
+    params = {
+        "inviteId": invite_id,
+    }
     try:
         response = requests.get(url, params = params,verify=False)
         if response.status_code == 200:

@@ -174,20 +174,20 @@ def write_to_csv(data):
             print("最终的该行为的历史记录表：",df_filtered)
             print("共计行数：", len(df_filtered))
 
-            # print("开始往太极传数据")
-            # for _, row in df_filtered.iterrows():
-            #     item = {
-            #         "工单编号": row.get("工单编号", ""),
-            #         "违法类型": row.get("违法类型", ""),
-            #         "发生地点": row.get("发生地点", ""),
-            #         "发生时间": row.get("发生时间", ""),
-            #         "处理状态": row.get("处理状态", ""),
-            #         "处理人": row.get("处理人", ""),
-            #         "path": row.get("path", ""),
-            #         "处理备注": row.get("处理备注", "")
-            #     }
-            #     print("正在处理：",item)
-            #     get_data(item)
+            print("开始往太极传数据")
+            for _, row in df_filtered.iterrows():
+                item = {
+                    "工单编号": row.get("工单编号", ""),
+                    "违法类型": row.get("违法类型", ""),
+                    "发生地点": row.get("发生地点", ""),
+                    "发生时间": row.get("发生时间", ""),
+                    "处理状态": row.get("处理状态", ""),
+                    "处理人": row.get("处理人", ""),
+                    "path": row.get("path", ""),
+                    "处理备注": row.get("处理备注", "")
+                }
+                print("正在处理：",item)
+                get_data(item)
 
             # 保存（追加写入 CSV，不写表头）
             df_filtered.to_csv(csv_file_path, mode="a", index=False, header=False)  #pd行，要一行一行输入
@@ -298,6 +298,21 @@ def process_images(
             timestamp = future_time.strftime("%Y%m%d_%H%M%S")
             filename = f"camera_{camera_id}_{timestamp}.jpg"
             output_path = os.path.join(output_folder, filename)
+
+            # 保存这个没标框的违法图像
+            # 假设 image 是你的PIL Image对象
+            save_dir = './shibie_yuantu/' + output_folder.rsplit('/', 1)[-1]  # 提取出违法行为保存的路径
+
+            # 判断文件夹是否存在，不存在就创建
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+
+            # 拼接保存路径，文件名可以自己定，比如用“output.png”
+            save_path = os.path.join(save_dir, filename)
+
+            # 保存图片
+            image.save(save_path)
+            print(f"图片已保存到 {save_path}")
 
             # 绘制边界框
             original_width, original_height = image.size
