@@ -2,6 +2,8 @@
 import time
 import traceback
 import pandas as pd
+import schedule
+
 from 提交数据库 import insert_database
 def tuisong(csv_file_path):
     # 使用 pandas 读取 CSV 文件
@@ -29,7 +31,17 @@ def tuisong(csv_file_path):
 
     # 清空数据行
     clear_csv_data(csv_file_path)
+def job():
+    print("开始推送数据", flush=True)
+    tuisong("Copy of result.csv")
+    print("推送数据库并清理csv完成", flush=True)
 def tuisong_main():
+    # # 每天 2 点执行一次
+    # schedule.every().day.at("02:00").do(job)
+    #
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(60)  # 每分钟检查一次任务
     while True:
         try:
             print("开始推送数据", flush=True)
