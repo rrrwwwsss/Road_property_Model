@@ -10,6 +10,7 @@ from 四项违法行为识别 import poll_cameras
 from 堆放物品_摆设摊位 import poll_cameras1
 from 清理图片 import clear_begin
 from 托管本地图片到网络 import run_flask_server
+from 定期推送数据库 import tuisong_main
 import sys
 # 关闭输出缓冲，解决打印堵塞问题
 sys.stdout.reconfigure(line_buffering=True)
@@ -208,10 +209,16 @@ if __name__ == '__main__':
     # 开启托管本地图片到网络进程
     server_process = multiprocessing.Process(target=run_flask_server, name="ServerImg")
     server_process.start()
+
     # 开启删除图片进程
     clear_process = multiprocessing.Process(target=clear_begin, name="ClearImg")#clear_begin(会阻塞主进程)
     # 不设置daemon=True，防止主进程退出时，子进程也退出
     clear_process.start()
+
+    # 开启推送太极进程
+    tuisong_process = multiprocessing.Process(target=tuisong_main, name="tuisong_main")  # clear_begin(会阻塞主进程)
+    # 不设置daemon=True，防止主进程退出时，子进程也退出
+    tuisong_process.start()
     while True :
         run_loop()
         print("等待5秒后继续下一轮操作...\n")

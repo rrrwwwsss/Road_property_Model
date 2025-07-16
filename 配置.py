@@ -67,7 +67,7 @@ linshi_list = [{'camera_id': '11011101071328110008', 'monitor_point': 'G5京昆�
                {'camera_id': '11000000001312814604', 'monitor_point': 'G108京昆线K22+250小园立交桥'},
                {'camera_id': '11000000001315973478', 'monitor_point': 'G108京昆线K30+170鲁家滩二桥'},
                {'camera_id': '11000000001318701885', 'monitor_point': 'G109京拉线K110+770张马路口'},
-               {'camera_id': '11000000001315959615', 'monitor_point': 'G109京拉线K35+930担礼隧道'},
+               # {'camera_id': '11000000001315959615', 'monitor_point': 'G109京拉线K35+930担礼隧道'},
                {'camera_id': '11000000001315378966', 'monitor_point': 'G109京拉线K87+600新高铺'},
                {'camera_id': '11000000001315432555', 'monitor_point': 'G234兴阳线K342+890鲁家滩环岛'},
                {'camera_id': '11000000001315023163', 'monitor_point': 'S210三温路K1+550与X906交叉口'},

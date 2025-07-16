@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 import uuid
-from 数据库配置 import DB_CONFIG, OffsiteRule, OffsiteWarnsHb, OffsiteIntellectErrorsHb, OffsiteEvidenceConstant, VIOLATION_DICT
+from 数据库配置 import DB_CONFIG, OffsiteRule, OffsiteWarnsHb, OffsiteIntellectErrorsHb, OffsiteEvidenceConstant, VIOLATION_DICT,AUTHORITY_CODE
 
 from decimal import Decimal
 import dmPython
@@ -44,8 +44,9 @@ def insert_database(data):
 
     UPDATE_TIME = datetime.now()
     CREATE_TIME = datetime.now()
-    FIND_TIME=datetime.now()
+    FIND_TIME = datetime.now()
     YEHU_ID = str(uuid.uuid4().hex)
+
     QUESTION_DATA = [
       {
         "TJ_NAME": data["TJ_NAME"],
@@ -56,7 +57,7 @@ def insert_database(data):
             # "WORK_ORDER_ID": data['工单编号'],
             "VIOLATION_TYPE": data['违法类型'],
             "LOCATION": data['发生地点'],
-            "VIOLATION_TIME": data['发生时间'],
+            "VIOLATION_TIME": datetime.strptime(data['发生时间'], "%Y%m%d_%H%M%S").strftime("%Y-%m-%d %H:%M:%S"),
             "IMAGE_PATH": data['图片路径']
           }
         ]
@@ -85,7 +86,8 @@ def insert_database(data):
                                           CREATE_TIME=CREATE_TIME,
                                           UPDATE_TIME=UPDATE_TIME,
                                           IS_DEL="0",
-                                          MEASURE=data['MEASURE'])
+                                          MEASURE=AUTHORITY_CODE[k])
+                print(offsiteRule)
                 insert_object(offsiteRule, table_name='OFFSITE_RULE')
             except Exception as e:
                 print(e)
@@ -132,18 +134,24 @@ def insert_database(data):
     # insert_object(offsiteIntellectDetailsHb, table_name='OFFSITE_INTELLECT_DETAILS_HB')
 
     #OFFSITE_EVIDENCE_CONSTANT 对这个表存储的是QUESTION_DATA的NEXT_LEVEL信息，因此要把其每个字段都当作一行输入数据库
-    indexs = 0
-    for k, v in QUESTION_DATA[0]['NEXT_LEVEL'][0].items():
-        offsiteEvidenceConstant = OffsiteEvidenceConstant(ID=str(uuid.uuid4().hex),
-                                                          QUESTION_ID=OffsiteRule_id,
-                                                          NAME=k,
-                                                          TRANSLATION=field_map[k],
-                                                          CONSTANT_TYPE="EVIDENCE",
-                                                          ORDER_NO=Decimal(indexs),
-                                                          IS_SHOW=Decimal('1'),
-                                                          )
-        insert_object(offsiteEvidenceConstant, table_name='OFFSITE_EVIDENCE_CONSTANT')
-        indexs += 1
+
+    import 数据库配置
+    if 数据库配置.IS_SUBMIT == True:
+        print("开始提交六项违法行为到数据库")
+        # 先把六个违法行为存储到数据库中，后面就不用存了
+        for i, j in VIOLATION_DICT.items():
+            indexs = 0
+            for k, v in QUESTION_DATA[0]['NEXT_LEVEL'][0].items():
+                offsiteEvidenceConstant = OffsiteEvidenceConstant(ID=str(uuid.uuid4().hex),
+                                                                  QUESTION_ID=j,
+                                                                  NAME=k,
+                                                                  TRANSLATION=field_map[k],
+                                                                  CONSTANT_TYPE="EVIDENCE",
+                                                                  ORDER_NO=Decimal(indexs),
+                                                                  IS_SHOW=Decimal('1'),
+                                                                  )
+                insert_object(offsiteEvidenceConstant, table_name='OFFSITE_EVIDENCE_CONSTANT')
+                indexs += 1
 
 
 

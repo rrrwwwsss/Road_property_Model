@@ -94,8 +94,7 @@ def write_to_csv(data):
         )
     """)
     conn.commit()
-    # csv保存路径
-    csv_file_path = RESULT_PATH
+
 
     # 读取堆放物品摆摊两个违法行为临时 SQLite 数据库表
     wupin_tanwei_pd = pd.read_sql_query("SELECT * FROM wupin_tanwei", conn)
@@ -188,9 +187,9 @@ def write_to_csv(data):
                 }
                 print("正在处理：",item)
                 get_data(item)
+                break  # 终止循环，只执行一次
 
-            # 保存（追加写入 CSV，不写表头）
-            df_filtered.to_csv(csv_file_path, mode="a", index=False, header=False)  #pd行，要一行一行输入
+
             # 读取SQLite 的数据（如果还没读）
             conn = sqlite3.connect(TEMPORARY_RECORD)
             cursor = conn.cursor()
@@ -199,7 +198,7 @@ def write_to_csv(data):
             conn.commit()
             conn.close()
 
-            return "文件已写入result.csv，临时存放数据库已更新"
+            return "临时存放数据库已更新"
         else:
             print("所有记录距离都在 4 小时以内 ❌")
             write_to_sqlite(data)

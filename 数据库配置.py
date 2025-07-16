@@ -13,7 +13,7 @@ DB_CONFIG = {
     'password': 'sjtb#_2024',  # 数据库密码
 }
 # 控制提交六个违法行为类型到数据库的变量
-IS_SUBMIT = True
+IS_SUBMIT = False
 # 违法行为ID
 VIOLATION_DICT = {
     "擅自占用、挖掘公路": "6b50c0ae92ef4b94880443a6b362e731",

@@ -67,7 +67,7 @@ def write_to_csv(file_path, data):
     wupin_tanwei_pd["发生时间"] = pd.to_datetime(wupin_tanwei_pd["发生时间"], format="%Y%m%d_%H%M%S")
 
     # 计算 8 小时的时间差
-    time_diff = timedelta(hours=8)
+    time_diff = timedelta(hours=16)
 
     # 筛选条件：发生地点、违法类型一致，且发生时间在 8 小时以内
     filtered_df = wupin_tanwei_pd[
