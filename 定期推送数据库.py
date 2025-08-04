@@ -2,7 +2,7 @@
 import time
 import traceback
 import pandas as pd
-import schedule
+# import schedule
 
 from 提交数据库 import insert_database
 def tuisong(csv_file_path):
@@ -43,6 +43,7 @@ def tuisong_main():
     #     schedule.run_pending()
     #     time.sleep(60)  # 每分钟检查一次任务
     while True:
+        time.sleep(4000)
         try:
             print("开始推送数据", flush=True)
             tuisong("Copy of result.csv")

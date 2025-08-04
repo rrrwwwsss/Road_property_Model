@@ -62,4 +62,3 @@ def get_data(model_data):
         writer.writerow(data)
 
     print('传入提交数据库模块数据:',data)
-    insert_database(data)
