@@ -215,22 +215,31 @@ def run_loop():
         traceback.print_exc()
 
 if __name__ == '__main__':
+    import multiprocessing
+    import time
+    from my_logger import Logger
+
+    # 初始化日志
+    logger = Logger(name="AppLogger").get_logger()
+
     print("开始运行")
-    # 开启托管本地图片到网络进程
+
+    # 开启托管本地图片进程
     server_process = multiprocessing.Process(target=run_flask_server, name="ServerImg")
     server_process.start()
 
     # 开启删除图片进程
-    clear_process = multiprocessing.Process(target=clear_begin, name="ClearImg")#clear_begin(会阻塞主进程)
-    # 不设置daemon=True，防止主进程退出时，子进程也退出
+    clear_process = multiprocessing.Process(target=clear_begin, name="ClearImg")
     clear_process.start()
 
     # 开启推送太极进程
-    tuisong_process = multiprocessing.Process(target=tuisong_main, name="tuisong_main")  # clear_begin(会阻塞主进程)
-    # 不设置daemon=True，防止主进程退出时，子进程也退出
+    tuisong_process = multiprocessing.Process(target=tuisong_main, name="tuisong_main")
     tuisong_process.start()
-    while True :
+
+    # 主循环
+    while True:
         run_loop()
-        print("等待5秒后继续下一轮操作...\n")
-        time.sleep(300)  # 等待5秒
+        print("等待5分钟后继续下一轮操作...")
+        time.sleep(300)  # 5分钟
+
 
