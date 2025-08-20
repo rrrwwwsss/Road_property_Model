@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 import requests
 from 配置 import *
@@ -43,11 +44,17 @@ def pil_image_to_base64(img):
 def pattern_recognition(question, image):
     # 假设 image 是 PIL Image 对象
     img_b64 = pil_image_to_base64(image)
-    response = detect_frame(question, img_b64)
-    # 解析响应
-    try:
-        result_data = json.loads(response[0])
-    except json.JSONDecodeError as e:
-        print(f"JSON解析错误: {e}")
-        result_data = {"result": "no"}
+    response = detect_frame(question, img_b64)  # 返回的是 list，比如 [str]
+
+    result_data = {"result": "no"}  # 默认值
+
+    if response and isinstance(response[0], str):
+        try:
+            # 提取第一个 {} 包含的 JSON 片段
+            match = re.search(r'\{.*\}', response[0], re.S)
+            if match:
+                result_data = json.loads(match.group(0))
+        except json.JSONDecodeError as e:
+            print(f"⚠️ JSON解析错误: {e}, 原始数据: {response[0]}")
+
     return result_data

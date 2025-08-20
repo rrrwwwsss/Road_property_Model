@@ -4,7 +4,6 @@ import requests
 
 from 数据库配置 import DISTRICT_CODE
 from 配置 import CAMERA_DATA, BASE_URL, CAMERA_RESULT_DATA
-
 # 设置显示所有行和列
 pd.set_option('display.max_rows', None)       # 显示所有行
 pd.set_option('display.max_columns', None)    # 显示所有列
@@ -13,7 +12,6 @@ pd.set_option('display.max_colwidth', None)   # 显示所有列内容，尤其�
 
 # 获取摄像头id
 def get_camera_id(camera_name: str) -> str:
-
     # 构造 URL
     base_url = BASE_URL + "/searchCamera.action"
     params = {
@@ -84,6 +82,7 @@ def get_dianwei_data():
             name_str = str(name).strip()
 
             if name_str not in camera_id_cache:
+
                 # 请求接口并缓存
                 camera_id = get_camera_id(name_str)
                 camera_id_cache[name_str] = camera_id

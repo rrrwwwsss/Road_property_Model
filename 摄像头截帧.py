@@ -91,6 +91,7 @@ def capture_frame_from_camera(camera_id):
                 if "code" in data and data["code"] == 0 and "data" in data:
                     video_stream_url = data["data"].get("videoStream", "")
                     invite_id = data["data"].get("inviteId", "")
+                    print(data["data"])
                     print(f"视频流URL: {video_stream_url}")
                     print(f"播放句柄: {invite_id}")
                 else:
@@ -107,11 +108,14 @@ def capture_frame_from_camera(camera_id):
 
         # 第二步：从视频流中截帧
         if video_stream_url:
+            # VideoCapture 会用 FFmpeg 打开 RTSP 流，开始读取数据包
+            #  FFmpeg 解析时发现某些宏块数据损坏 → 打印你看到的 cbp too large、error while decoding MB 等警告。
             cap = cv2.VideoCapture(video_stream_url)
             if not cap.isOpened():
                 print("无法打开视频流，请检查URL是否正确。")
                 return None
-
+            # 如果当前缓冲区里的帧坏了，FFmpeg 会继续丢掉坏数据，直到遇到一个完整的 I 帧（关键帧）才能解码出图像。
+            # 所以你虽然在解码过程中报了一堆“坏帧”错误，但最后还是等到一个关键帧 → 返回 ret=True，frame 里有图像数据。
             ret, frame = cap.read()
             if not ret:
                 print("无法读取视频流帧，请检查网络或视频流是否可用。")

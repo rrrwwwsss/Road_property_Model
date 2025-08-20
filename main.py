@@ -35,7 +35,7 @@ sys.stdout.reconfigure(line_buffering=True)
 wajue_question = """
 Role: You are an intelligent assistant capable of accurately identifying road excavation activities in images.
 Task: Please analyze the image and determine whether there is any ongoing road excavation activity. These activities must include the excavation behavior and construction obstacles, and both must be present simultaneously to be recognized! The focus is on detecting actual construction and actions, rather than vehicles and machinery. Ignore normal large vehicles, pedestrians, toll stations, buildings, and road obstacles.
-Note: If it cannot be recognized due to lighting or camera issues, please return "No". If you are unsure, always return "No" instead of making a wrong judgment! If normal large moving vehicles are identified, also return "No".
+Note: If it cannot be recognized due to lighting or camera issues, please return "no". If you are unsure, always return "no" instead of making a wrong judgment! If normal large moving vehicles are identified, also return "no".
 """
 # 井盖缺失
 jinggai_question = """
@@ -49,9 +49,19 @@ You are an intelligent assistant capable of accurately identifying instances of 
 # Output format: If non-road marking behavior is detected, please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 image size. Otherwise, please return: {"result": "no"}.
 # """
 gongbiao_question = """
-Role: You are an intelligent assistant capable of accurately identifying the placement of billboards on the road. Your task is to detect the presence of such billboards and return their positions in the image.
-Task: Please analyze the image and determine if any red billboards are placed on the road or within the road area.
-Note: If the content on the sign cannot be clearly seen due to camera or lighting issues, please return 'no'.
+Role: You are an intelligent assistant with the ability to recognize road signs or banners. You can accurately extract and analyze the text content.
+Task: Please identify the signs or banners on the road in the image. If the text content can be extracted, please determine whether it is related to "traffic or official affairs" or "personal affairs":
+Words related to "personal affairs" include "Welcome to **", "Advertisement of **", "Car repair of **", "Recruitment of **", etc.
+Words related to "traffic or official affairs" include "Maximum weight ** tons", "Prohibition of **", "Drunk driving **", "Traffic **", "Drive **", "Fasten seat belt", "Section **", "Be careful **", etc.
+Note: If the text in the image is not clearly readable due to the shooting angle, lighting, or blurriness, or if it is uncertain whether the text comes from an unofficial source, please uniformly return "no".
+Output: If the text is of personal affairs nature, please return:
+{"result": "yes",
+"bounding_boxes": [[xmin1, ymin1, xmax1, ymax1]...] ，
+"Content": The extracted text content } 
+If it is related to transportation or official matters, please return: 
+{ "result": "no", 
+"Content": The extracted text content }
+- The coordinates should be based on an image size of 1000x1000.
 """
 # 设置悬挂物
 # xuangua_question = """
@@ -155,7 +165,7 @@ def updata_dianList(action):
     return unique_list
 def run_loop():
     wajue_question_action = {'擅自占用、挖掘公路': wajue_question+model_result}
-    gongbiao_action = {'在公路用地范围内设置公路标志以外的其他标志': gongbiao_question+model_result}
+    gongbiao_action = {'在公路用地范围内设置公路标志以外的其他标志': gongbiao_question}
     jinggai_action = {'在公路范围内擅自移动井盖': jinggai_question+model_result}
     xuangua_action = {'遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全': xuangua_question+model_result}
     duifang_action = {'在公路上及公路用地范围内堆放物品': wupin_question+model_result}
