@@ -49,11 +49,13 @@ You are an intelligent assistant capable of accurately identifying instances of 
 # Output format: If non-road marking behavior is detected, please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 image size. Otherwise, please return: {"result": "no"}.
 # """
 gongbiao_question = """
-Role: You are an intelligent assistant with the ability to recognize road signs or banners. You can accurately extract and analyze the text content.
-Task: Please identify the signs or banners on the road in the image. If the text content can be extracted, please determine whether it is related to "traffic or official affairs" or "personal affairs":
-Words related to "personal affairs" include "Welcome to **", "Advertisement of **", "Car repair of **", "Recruitment of **", etc.
-Words related to "traffic or official affairs" include "Maximum weight ** tons", "Prohibition of **", "Drunk driving **", "Traffic **", "Drive **", "Fasten seat belt", "Section **", "Be careful **", etc.
-Note: If the text in the image is not clearly readable due to the shooting angle, lighting, or blurriness, or if it is uncertain whether the text comes from an unofficial source, please uniformly return "no".
+Role: You are an intelligent assistant with the ability to recognize road signs or billboards. You can accurately extract and analyze the text content.
+Task: Please identify the signs or billboards on the road (please note that this refers to the road itself, not the buildings along the road. If the sign is a common one on the buildings, please ignore it!) 。 If the text content can be extracted, please determine whether it is related to "public affairs" or "personal affairs":
+Vocabulary related to "personal affairs" includes: "Welcome to **", "Advertisement of **", "Car maintenance of **", "Recruitment of **", etc.
+Vocabulary related to "public affairs" includes: 1) Vocabulary related to "transportation" (such as "Maximum load of ** tons", "Prohibition of **", "Drunk driving of **", "Transportation of **", "Drive **", "Fasten seat belt", "Section of **", "Be careful of **", etc.);
+2) Place names (such as Beijing, Shanghai, Xicheng District, Yao Guantun, Huangcun, etc.);
+3) Indicative words (such as "** parking lot", "** gas station", etc.)
+Note: There may be annotation texts related to road names in the upper left corner of the picture. These are irrelevant to the recognition task, so please ignore them! Do not recognize them as the text on the sign! If the text in the picture is difficult to recognize due to the shooting angle, lighting, or blurriness, or if you are unsure whether the text comes from an unofficial source, please reply "no" in all cases.
 Output: If the text is of personal affairs nature, please return:
 {"result": "yes",
 "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1]...] ，
@@ -74,8 +76,9 @@ If it is related to transportation or official matters, please return:
 # Output format: If illegal items are detected hanging above the road or within the road area, please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 image size. Otherwise, please return: {"result": "no"}.
 # """
 xuangua_question = """
-Role: You are an intelligent assistant capable of accurately identifying instances of illegal items being hung above roads or within the road area. Your task is to detect the presence of non-standard and illegal hanging objects and return their positions in the image. 
-Task: Analyze the image and determine if there are any illegal items suspended above the road, such as banners, ropes, decorations, or other non-road infrastructure objects. Ignore pedestrians, vehicles (including parked vehicles), and legal road accessories (such as traffic signals, traffic signs, lamp posts, surveillance cameras, traffic guidance devices, etc.).
+Role: You are an intelligent assistant capable of accurately identifying illegal items hanging above roads or within road areas. Your task is to detect the presence of non-standard and illegal hanging items and return their positions in the image.
+Task: Analyze the image and determine if there are any illegal items hanging above the road, such as banners, ropes, decorations, or other non-road infrastructure items. Ignore pedestrians, vehicles (including parked vehicles), and legal road infrastructure (such as traffic signals, traffic signs, lamp posts, surveillance cameras, traffic guidance devices, etc.).
+Note: If the image is blurry, obstructed, or has severely insufficient lighting, making it impossible to make an accurate judgment, reply "no".
 """
 # 堆放物品
 # wupin_question = """

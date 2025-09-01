@@ -12,6 +12,8 @@ from PIL import Image
 import numpy as np
 from 配置 import *
 import csv
+from 查询许可数据库 import job
+
 
 def write_to_sqlite(data):
     conn = sqlite3.connect(TEMPORARY_RECORD)
@@ -66,7 +68,7 @@ def write_to_csv(file_path, data):
     # 需要将 wupin_tanwei_pd 中的 发生时间 转换为 datetime 类型
     wupin_tanwei_pd["发生时间"] = pd.to_datetime(wupin_tanwei_pd["发生时间"], format="%Y%m%d_%H%M%S")
 
-    # 计算 8 小时的时间差
+    # 计算 16 小时的时间差
     time_diff = timedelta(hours=16)
 
     # 筛选条件：发生地点、违法类型一致，且发生时间在 8 小时以内
@@ -76,6 +78,42 @@ def write_to_csv(file_path, data):
         # 发生时间列各元组 - data[发生时间]（datetime类型） 的绝对值要小于8
         ((wupin_tanwei_pd["发生时间"] - data_time).abs() <= time_diff)
         ]
+
+    # 删选条件:如果违法类型是“擅自占用、挖掘公路”和非工标，则增加 query_results校验
+    # 也就是去许可信息数据库匹配对应的监控点位下有没有许可信息
+    try:
+        query_results = job()
+
+        if data["违法类型"] == "擅自占用、挖掘公路":
+            # 从 query_results['zhanwagonglu'] 中找有没有 constructaddress = data["发生地点"]
+            matched_addresses = [
+                item for item in query_results.get("zhanwagonglu", [])
+                if item.get("constructaddress") == data["发生地点"]
+            ]
+
+            if matched_addresses:
+                # 如果匹配上，则清空结果
+                filtered_df = pd.DataFrame(columns=wupin_tanwei_pd.columns)
+                print("已经有许可信息，不是违法行为")
+            else:
+                print("没有许可信息")
+
+        elif data["违法类型"] == "在公路用地范围内设置公路标志以外的其他标志":
+            # 从 query_results['feigongbiao'] 中找有没有 constructaddress = data["发生地点"]
+            matched_addresses = [
+                item for item in query_results.get("feigongbiao", [])
+                if item.get("constructaddress") == data["发生地点"]
+            ]
+
+            if matched_addresses:
+                # 如果匹配上，则清空结果
+                filtered_df = pd.DataFrame(columns=wupin_tanwei_pd.columns)
+                print("已经有许可信息，不是违法行为")
+            else:
+                print("没有许可信息")
+    except Exception as e:
+        print(f"校验 query_results 出错: {e}")
+        # 出错也不影响后续运行
 
     # 如果临时数据库里没有发生地点、违法类型一致，且发生时间在 8 小时以内的行为，则执行上传逻辑
     if filtered_df.empty:
