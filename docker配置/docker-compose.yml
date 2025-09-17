@@ -8,7 +8,7 @@ services:
       - "5000:5000"     # 主机端口:容器端口 开启托管本地图片到网络模块，使用端口映射
     volumes:
       - /data1/qwen2v/result.csv:/app/result.csv        # 挂载宿主机的 result.csv 文件（改成你机器上的实际路径）
-#      - /data1/qwen2v/road_property_rightsmodel:/app/road_property_rightsmodel   # 挂载宿主机代码目录（改成你机器上的实际路径）
+      - /data1/qwen2v/road_property_rightsmodel:/app/road_property_rightsmodel   # 挂载宿主机代码目录（改成你机器上的实际路径）
       - /data1/qwen2v/pic:/app/pic
       - /data1/qwen2v/road_property_rightsmodel/data:/app/road_property_rightsmodel/data
     environment:

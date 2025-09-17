@@ -3,13 +3,9 @@ import dmPython
 import time
 import json
 from datetime import datetime, timedelta
+from 配置 import *
 # 达梦数据库配置
-db_config = {
-    'host': '172.26.57.210',   # 数据库地址
-    'port': 5236,          # 数据库端口，达梦默认5236
-    'user': 'GLLWFXM',      # 数据库用户名
-    'password': 'zfzdqzj@123456,.',  # 数据库密码
-}
+db_config = XVKE_DB_CONFIG
 # 全局变量存储查询结果
 query_results = {
     'feigongbiao': [],

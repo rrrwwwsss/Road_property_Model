@@ -16,6 +16,14 @@ XVANGUA_PATH = DATA_BASE_PATH + "/xuangua"
 RESULT_PATH = "/app/result.csv"
 CAMERA_DATA = "./data/《视频点位确认表》 0620.xlsx" # 摄像头点位信息，相对路径
 CAMERA_RESULT_DATA = "./data/result_with_camera_id.csv"# 整合数据后的摄像头点位信息，相对路径
+
+# 许可数据库配置
+XVKE_DB_CONFIG = {
+    'host': '172.26.57.210',   # 数据库地址
+    'port': 5236,          # 数据库端口，达梦默认5236
+    'user': 'GLLWFXM',      # 数据库用户名
+    'password': 'zfzdqzj@123456,.',  # 数据库密码
+}
 # 模型服务
 MODEL_SERVE_URL = "http://htc-qwen2vl:8000/generate"  # qwen2vl服务地址
 

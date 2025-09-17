@@ -16,6 +16,7 @@ from 查询许可数据库 import job
 
 
 def write_to_sqlite(data):
+    os.makedirs(os.path.dirname(TEMPORARY_RECORD), exist_ok=True)
     conn = sqlite3.connect(TEMPORARY_RECORD)
     cursor = conn.cursor()
 
@@ -39,6 +40,7 @@ def write_to_sqlite(data):
     conn.commit()
     conn.close()
 def write_to_csv(file_path, data):
+    os.makedirs(os.path.dirname(TEMPORARY_RECORD), exist_ok=True)
     # 创建SQLite数据库,存储临时监测数据
     conn = sqlite3.connect(TEMPORARY_RECORD)
     cursor = conn.cursor()
