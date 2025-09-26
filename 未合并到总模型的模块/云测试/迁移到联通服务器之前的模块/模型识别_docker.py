@@ -11,44 +11,27 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def detect_frame(question, image_base64):
-    # 这是把 Base64 内容包装成 Data URI（数据 URL）
-    image_data_url = f"data:image/png;base64,{image_base64}"  # 注意前缀
-
-    data = {
-        "model": "qwen2_5_vl",
-        "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "image_url", "image_url": {"url": image_data_url}},
-                    {"type": "text", "text": question}
-                ]
-            }
-        ],
-        "max_tokens": 512,
-        "do_sample": True,
-        "repetition_penalty": 1.0,
-        "temperature": 0.01,
-        "top_p": 0.001,
-        "top_k": 1
-    }
-
+    data = {"prompt": question, "image_base64": image_base64}
     try:
-        response = requests.post(
-            "http://192.168.0.161:1025/v1/chat/completions",
-            json=data,
-            timeout=60
-        )
-        response.raise_for_status()
+        response = requests.post(MODEL_SERVE_URL, json=data, verify=False)
         response_data = response.json()
-
-        reply = response_data["choices"][0]["message"]["content"]
-        print("大模型响应数据:", reply)
-        return reply
-
+        # file_path = "output.txt"
+        #
+        # # 判断文件是否存在
+        # if os.path.exists(file_path):
+        #     print(f"{file_path} 已经存在")
+        # # 使用 'a' 模式打开文件（追加模式）
+        # with open(file_path, "a", encoding="utf-8") as file:
+        #     json.dump(response_data, file, ensure_ascii=False, indent=4)  # 将响应数据写为格式化的 JSON 字符串
+        #     file.write("\n")  # 添加换行符，以便每次追加数据后占一行
+        #
+        # print(f"{file_path} 文件已创建并写入数据")
+        print('大模型响应数据', response_data)
+        return response_data
     except Exception as e:
         print(f"[detect_frame] 调用异常: {type(e).__name__} - {e}")
-        return '{"result": "no"}'
+        return ['{"result": "no"}']
+
 
 def pil_image_to_base64(img):
     buffered = BytesIO()

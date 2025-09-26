@@ -1,4 +1,4 @@
-
+from datetime import datetime, timedelta
 import time
 import traceback
 import pandas as pd
@@ -36,14 +36,27 @@ def job():
     tuisong("Copy of result.csv")
     print("推送数据库并清理csv完成", flush=True)
 def tuisong_main():
-    # # 每天 2 点执行一次
+    # # 每天 1 点执行一次
     # schedule.every().day.at("02:00").do(job)
     #
     # while True:
     #     schedule.run_pending()
     #     time.sleep(60)  # 每分钟检查一次任务
+    hour = 1
+    minute = 0
+    print("定期推送数据程序运行")
     while True:
-        time.sleep(4000)
+        now = datetime.now()
+        # 下次运行时间
+        next_run = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        if next_run <= now:
+            next_run += timedelta(days=1)
+
+        # 等待到指定时间
+        sleep_seconds = (next_run - now).total_seconds()
+        time.sleep(sleep_seconds)
+
+        # 执行任务
         try:
             print("开始推送数据", flush=True)
             tuisong("Copy of result.csv")
@@ -51,6 +64,6 @@ def tuisong_main():
         except Exception as e:
             print("清理过程中出现异常：", flush=True)
             traceback.print_exc()  # 打印完整异常堆栈
-        time.sleep(86400)  # 每天执行一次
+
 if __name__ == "__main__":
     tuisong_main()

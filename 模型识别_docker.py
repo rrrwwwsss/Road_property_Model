@@ -11,27 +11,44 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def detect_frame(question, image_base64):
-    data = {"prompt": question, "image_base64": image_base64}
+    # 这是把 Base64 内容包装成 Data URI（数据 URL）
+    image_data_url = f"data:image/png;base64,{image_base64}"  # 注意前缀
+    data = {
+        "model": "qwen2_5_vl",  # 使用的模型名称，这里是 Qwen2.5-VL (多模态，支持图文输入)
+        "messages": [  # 对话历史，采用 Chat 格式
+            {
+                "role": "user",  # 角色，这里是用户
+                "content": [  # 输入的内容，可以是图片+文字的多模态输入
+                    {"type": "image_url", "image_url": {"url": image_data_url}},
+                    # 图片输入，image_data_url 是 base64 或 http 链接
+                    {"type": "text", "text": question}  # 文字输入，即用户的问题
+                ]
+            }
+        ],
+        "max_tokens": 512,  # 最大输出 token 数，限制生成回复的长度
+        "do_sample": True,  # 是否启用采样（随机性），True 表示不是完全贪心搜索
+        "repetition_penalty": 1.0,  # 重复惩罚系数，>1 会惩罚模型重复的内容，这里 1.0 表示不做惩罚
+        "temperature": 0.01,  # 温度系数，控制生成的随机性。越接近 0 越确定，越大越随机，这里 0.01 表示几乎确定性输出
+        "top_p": 0.001,  # nucleus sampling 截断概率。取累计概率 ≤0.001 的 token 候选，非常严格
+        "top_k": 1  # 只从概率最高的前 1 个 token 中选取 → 和 greedy search 很像
+    }
+
     try:
-        response = requests.post(MODEL_SERVE_URL, json=data, verify=False)
+        response = requests.post(
+            LIANTONG_MODEL,
+            json=data,
+            timeout=60
+        )
+        response.raise_for_status()
         response_data = response.json()
-        # file_path = "output.txt"
-        #
-        # # 判断文件是否存在
-        # if os.path.exists(file_path):
-        #     print(f"{file_path} 已经存在")
-        # # 使用 'a' 模式打开文件（追加模式）
-        # with open(file_path, "a", encoding="utf-8") as file:
-        #     json.dump(response_data, file, ensure_ascii=False, indent=4)  # 将响应数据写为格式化的 JSON 字符串
-        #     file.write("\n")  # 添加换行符，以便每次追加数据后占一行
-        #
-        # print(f"{file_path} 文件已创建并写入数据")
-        print('大模型响应数据', response_data)
-        return response_data
+
+        reply = response_data["choices"][0]["message"]["content"]
+        print("大模型响应数据:", reply)
+        return reply
+
     except Exception as e:
         print(f"[detect_frame] 调用异常: {type(e).__name__} - {e}")
-        return ['{"result": "no"}']
-
+        return '{"result": "no"}'
 
 def pil_image_to_base64(img):
     buffered = BytesIO()

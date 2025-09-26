@@ -321,9 +321,7 @@ def process_images(
                 original_width,
                 original_height
             )
-            # rescaled_boxes是根据大模型返回的1000*1000标准坐标处理得到的原始坐标，但72b大模型不会返回1000*1000的标准坐标，只返回原始坐标，
-            # 因此使用72b大模型时不用转换，直接使用normalized_boxes
-            output_image = draw_bounding_boxes(image, normalized_boxes)
+            output_image = draw_bounding_boxes(image, rescaled_boxes)
 
 
             output_image.save(output_path)

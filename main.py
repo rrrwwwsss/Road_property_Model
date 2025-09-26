@@ -33,9 +33,22 @@ sys.stdout.reconfigure(line_buffering=True)
 # Output format: Please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 size of the image. Otherwise, return: {"result": "no"}.
 # """
 wajue_question = """
-Role: You are an intelligent assistant capable of accurately identifying road excavation activities in images.
-Task: Please analyze the image and determine whether there is any ongoing road excavation activity. These activities must include the excavation behavior and construction obstacles, and both must be present simultaneously to be recognized! The focus is on detecting actual construction and actions, rather than vehicles and machinery. Ignore normal large vehicles, pedestrians, toll stations, buildings, and road obstacles.
-Note: If it cannot be recognized due to lighting or camera issues, please return "no". If you are unsure, always return "no" instead of making a wrong judgment! If normal large moving vehicles are identified, also return "no".
+Role: You are an intelligent assistant capable of accurately identifying road occupation or excavation activities in images.
+Task: Analyze the given image and determine whether any vehicles are currently engaged in road occupation or excavation operations. Explanation:
+1. Identify the target vehicle:
+- First, check if there are any **large stationary vehicles** in the image, such as construction trucks, engineering vehicles or excavators.
+- Ignore those vehicles that are moving normally or are merely waiting to pass.
+2. Determine if the stationary large vehicle is engaged in construction activities, including but not limited to:
+- **Special Note**: Pay special attention to whether there are obvious signs or obstacles related to construction around the vehicle, such as fences, traffic cones or earth mounds. These are the most important clues for identifying road occupation or excavation activities. (Be careful not to confuse the normal road barriers with construction barriers, as some barriers may look similar to construction barriers.)
+- Vehicle body tilting, unloading or loading operations;
+- Movement of the excavator's arm or bucket;
+- Physical contact between the mechanical arm or fixed device and the road surface;
+- Interaction between personnel and the vehicle, operating the vehicle or directing the operation; or construction personnel moving around the vehicle.
+3. Exclude interfering factors:
+- Ignore normal-moving vehicles, or vehicles parked in a safe area and not engaged in construction;
+- Ignore buildings, pedestrians, toll stations and road isolation facilities.
+4. Image quality limitations:
+- If the image is blurry, obstructed or has insufficient light, making it impossible to make an accurate judgment, answer "No".
 """
 # 井盖缺失
 jinggai_question = """

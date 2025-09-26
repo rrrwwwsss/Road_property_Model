@@ -3,7 +3,7 @@ import json
 
 # 要测试的服务地址
 servers = [
-    "http://192.168.0.161:1025/v1/chat/completions",
+    "http://61.51.24.252:1025/v1/chat/completions",
     "http://192.168.0.161:2025/v1/chat/completions",
     "http://192.168.0.92:1025/v1/chat/completions",
 ]
