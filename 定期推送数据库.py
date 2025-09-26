@@ -3,6 +3,11 @@ import time
 import traceback
 import pandas as pd
 # import schedule
+from my_logger import Logger
+import os
+
+pid = os.getpid()  # 子进程 PID
+logger = Logger(name=f"定期推送数据库子进程-{pid}").get_logger()
 
 from 提交数据库 import insert_database
 def tuisong(csv_file_path):
@@ -31,10 +36,10 @@ def tuisong(csv_file_path):
 
     # 清空数据行
     clear_csv_data(csv_file_path)
-def job():
-    print("开始推送数据", flush=True)
-    tuisong("Copy of result.csv")
-    print("推送数据库并清理csv完成", flush=True)
+# def job():
+#     logger.info("开始推送数据", flush=True)
+#     tuisong("Copy of result.csv")
+#     logger.info("推送数据库并清理csv完成", flush=True)
 def tuisong_main():
     # # 每天 1 点执行一次
     # schedule.every().day.at("02:00").do(job)
@@ -44,7 +49,7 @@ def tuisong_main():
     #     time.sleep(60)  # 每分钟检查一次任务
     hour = 1
     minute = 0
-    print("定期推送数据程序运行")
+    logger.info("定期推送数据程序运行")
     while True:
         now = datetime.now()
         # 下次运行时间
@@ -58,11 +63,11 @@ def tuisong_main():
 
         # 执行任务
         try:
-            print("开始推送数据", flush=True)
+            logger.info("开始推送数据", flush=True)
             tuisong("Copy of result.csv")
-            print("推送数据库并清理csv完成", flush=True)
+            logger.info("推送数据库并清理csv完成", flush=True)
         except Exception as e:
-            print("清理过程中出现异常：", flush=True)
+            logger.info("清理过程中出现异常：", flush=True)
             traceback.print_exc()  # 打印完整异常堆栈
 
 if __name__ == "__main__":
