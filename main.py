@@ -234,9 +234,13 @@ if __name__ == '__main__':
     import multiprocessing
     import time
     from my_logger import Logger
+    from logging.handlers import QueueListener
+    log_queue = multiprocessing.Queue()
 
-    # 初始化日志
+    # 主进程 logger
     logger = Logger(name="AppLogger").get_logger()
+    queue_listener = QueueListener(log_queue, *logger.handlers)
+    queue_listener.start()
 
     print("开始运行")
 
@@ -249,7 +253,7 @@ if __name__ == '__main__':
     clear_process.start()
 
     # 开启推送太极进程
-    tuisong_process = multiprocessing.Process(target=tuisong_main, name="tuisong_main")
+    tuisong_process = multiprocessing.Process(target=tuisong_main, name="tuisong_main", args=(log_queue,))
     tuisong_process.start()
 
     # 主循环
