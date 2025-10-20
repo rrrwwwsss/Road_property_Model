@@ -52,7 +52,7 @@ The focus is on identifying *ongoing occupation or excavation activities*, not m
 1. Ignore large vehicles that are parked or driving within safe zones and not participating in construction.
 2. Ignore buildings, pedestrians, toll booths, and road dividers.
 3. **Image quality limitation:**
-   If the image is too blurry, obscured, or poorly lit to make an accurate judgment, respond with **“No.”**
+   If the image is too blurry, obscured, or poorly lit to make an accurate judgment, respond with **“no.”**
 
 """
 
