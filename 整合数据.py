@@ -21,11 +21,15 @@ def get_data(model_data):
     target = model_data['发生地点']
     unit_code = df[df['具备视频分析条件的点位'] == target]['辖区编码'].iloc[0]
     print("辖区编码:",unit_code)
+    try:
+        unit_code = str(int(float(unit_code)))
+    except (ValueError, TypeError):
+        unit_code = "未知"
     data = {
         "TJ_NAME": TJ_NAME_LIST[model_data["违法类型"]],
         # 违法行为描述
         "MEASURE": AUTHORITY_CODE[model_data["违法类型"]],  # 职权编码
-        "UNIT_CODE": str(int(float(unit_code))),  # 辖区编码
+        "UNIT_CODE": unit_code,  # 辖区编码
         "工单编号": model_data["工单编号"],
         "违法类型": model_data["违法类型"],
         "发生地点": model_data["发生地点"],

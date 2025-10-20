@@ -33,23 +33,29 @@ sys.stdout.reconfigure(line_buffering=True)
 # Output format: Please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 size of the image. Otherwise, return: {"result": "no"}.
 # """
 wajue_question = """
-Role: You are an intelligent assistant capable of accurately identifying road occupation or excavation activities in images.
-Task: Analyze the given image and determine whether any vehicles are currently engaged in road occupation or excavation operations. Explanation:
-1. Identify the target vehicle:
-- First, check if there are any **large stationary vehicles** in the image, such as construction trucks, engineering vehicles or excavators.
-- Ignore those vehicles that are moving normally or are merely waiting to pass.
-2. Determine if the stationary large vehicle is engaged in construction activities, including but not limited to:
-- **Special Note**: Pay special attention to whether there are obvious signs or obstacles related to construction around the vehicle, such as fences, traffic cones or earth mounds. These are the most important clues for identifying road occupation or excavation activities. (Be careful not to confuse the normal road barriers with construction barriers, as some barriers may look similar to construction barriers.)
-- Vehicle body tilting, unloading or loading operations;
-- Movement of the excavator's arm or bucket;
-- Physical contact between the mechanical arm or fixed device and the road surface;
-- Interaction between personnel and the vehicle, operating the vehicle or directing the operation; or construction personnel moving around the vehicle.
-3. Exclude interfering factors:
-- Ignore normal-moving vehicles, or vehicles parked in a safe area and not engaged in construction;
-- Ignore buildings, pedestrians, toll stations and road isolation facilities.
-4. Image quality limitations:
-- If the image is blurry, obstructed or has insufficient light, making it impossible to make an accurate judgment, answer "No".
+**Role:**
+You are an intelligent assistant capable of accurately identifying road occupation or excavation activities in images.
+
+**Task:**
+Analyze the provided image and determine whether there are vehicles currently engaged in road occupation or excavation work.
+The focus is on identifying *ongoing occupation or excavation activities*, not merely the presence of vehicles.
+
+**To be recognized as an occupation or excavation activity, the following three conditions must all be met:**
+
+1. The occupation or excavation activity itself is visibly taking place.
+2. The surrounding area shows clear construction-related signs or obstacles, such as fences, traffic cones, or piles of soil.
+   *(Note: Do not confuse ordinary road obstacles with construction-related ones.)*
+3. There are people around the vehicles directing or participating in the work.
+
+**Exclusion criteria:**
+
+1. Ignore large vehicles that are parked or driving within safe zones and not participating in construction.
+2. Ignore buildings, pedestrians, toll booths, and road dividers.
+3. **Image quality limitation:**
+   If the image is too blurry, obscured, or poorly lit to make an accurate judgment, respond with **“No.”**
+
 """
+
 # 井盖缺失
 jinggai_question = """
 You are an intelligent assistant capable of accurately identifying instances of missing or removed manhole covers on roads or within the road land area in images. Your task is to detect whether there is a manhole cover absence incident and return the coordinate range of the missing position in the image. Please analyze the image and determine whether there is a situation where the manhole cover has been removed, exposing the manhole opening. Focus on the locations on the road surface where the manhole cover should be but is now clearly missing (such as circular or square voids). Ignore the manhole covers that are already properly covered, pedestrians, vehicles (including parked vehicles). 
@@ -89,9 +95,13 @@ If it is related to transportation or official matters, please return:
 # Output format: If illegal items are detected hanging above the road or within the road area, please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 image size. Otherwise, please return: {"result": "no"}.
 # """
 xuangua_question = """
-Role: You are an intelligent assistant capable of accurately identifying illegal items hanging above roads or within road areas. Your task is to detect the presence of non-standard and illegal hanging items and return their positions in the image.
-Task: Analyze the image and determine if there are any illegal items hanging above the road, such as banners, ropes, decorations, or other non-road infrastructure items. Ignore pedestrians, vehicles (including parked vehicles), and legal road infrastructure (such as traffic signals, traffic signs, lamp posts, surveillance cameras, traffic guidance devices, etc.).
-Note: If the image is blurry, obstructed, or has severely insufficient lighting, making it impossible to make an accurate judgment, reply "no".
+Role: You are an intelligent assistant. Your task is to detect any actions that may endanger road safety by installing pipelines or hanging items on road infrastructure, and to return the position of such items in the image.
+Task: Analyze the image and determine if there are any illegal items hanging above the road, such as ropes, decorations, or other non-road infrastructure items.
+Please ignore the following:
+1. Pedestrians, vehicles (including parked vehicles) and legal road infrastructure (such as traffic signals, traffic signs, lamp posts, surveillance cameras, traffic guidance equipment, wires, etc.)
+2. Also ignore the hanging items on the buildings beside the road.
+3. Ignore the tree branches, leaves, etc. on the roadside.
+Note: If there are words on the item, extract the text and analyze the nature of the text. If it is related to traffic, public slogans, or place names, etc., ignore it. If the image is blurry, the view is obstructed due to rain or due to lighting reasons, and it is impossible to clearly see the image, reply "no" to avoid making a wrong judgment.
 """
 # 堆放物品
 # wupin_question = """
@@ -109,9 +119,12 @@ Note: If the image is blurry, obstructed, or has severely insufficient lighting,
 # Otherwise, return {"result": "no"}.
 # """
 wupin_question = """
-Role: You are an intelligent assistant capable of accurately identifying the act of stacking items on the road or within the road area.
-Task: Please analyze the image and determine whether there are any items stacked on the road or within the road area. The focus is on identifying the actual act of stacking or placing the items, rather than vehicles or pedestrians, nor guardrails, power poles, or road obstacles.
-Note: If you identify a vehicle, please return 'no'. If you are unsure whether this behavior constitutes stacking items, please return 'no' to avoid incorrect judgments.
+Role: You are an intelligent assistant capable of accurately identifying the act of stacking items on or within the road area.
+Task: Please analyze the picture and determine whether there are any items stacked on the road or within the road area. The focus is on identifying the actual act of stacking or placing items, rather than vehicles, pedestrians, guardrails, utility poles, or road obstacles.
+Please ignore the following items:
+1. Items present at a construction site during construction
+2. Isolation barriers, roadblocks, crash barrels, etc. used for guiding traffic, warning, or separating areas
+Note: If a vehicle is identified, please return "no". If you are unsure whether this behavior constitutes stacking items, please return "no" to avoid incorrect judgments.
 """
 # 摆设摊位
 # baitan_question = """
@@ -149,7 +162,7 @@ model_result = 'Output : If the above behavior can be identified, then the follo
 # 更新 配置.py的变量(全局变量)
 def updata_dianList(action):
     print('获取监控点位id')
-
+    # 从"result_with_camera_id.csv"获取要轮询的点位
     df = get_dianwei_data()
     # 第一步：筛选“是”
     df_filtered = df[df['是否可用'] == '是']
@@ -218,14 +231,14 @@ def run_loop():
 
     try:
         print("开始轮询堆放物品", flush=True)
-        poll_cameras1(duifang_list, duifang_action, WUPIN_PATH)
+        poll_cameras1(duifang_list+updata_dianList("在公路上及公路用地范围内堆放物品"), duifang_action, WUPIN_PATH)
     except Exception as e:
         print(f"[异常] 堆放物品：{e}", flush=True)
         traceback.print_exc()
 
     try:
         print("开始轮询摆设摊位", flush=True)
-        poll_cameras1(baitan_list, baitan_action, BAITAN_PATH)
+        poll_cameras1(duifang_list+updata_dianList("在公路上及公路用地范围内摆摊设点"),  baitan_action, BAITAN_PATH)
     except Exception as e:
         print(f"[异常] 摆设摊位：{e}", flush=True)
         traceback.print_exc()

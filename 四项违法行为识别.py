@@ -36,7 +36,7 @@ def write_to_sqlite(data):
     cursor.execute(f"INSERT INTO sixiang_weifa ({keys}) VALUES ({placeholders})", safe_values)#placeholders：占位符字符串，表示参数位,用？表示。 safe_values：实际的值，传给 ?
     conn.commit()
     conn.close()
-def write_to_csv(file_path, data):
+def write_to_csv(data):
     # 创建SQLite数据库,存储临时监测数据
     conn = sqlite3.connect(TEMPORARY_RECORD)
     cursor = conn.cursor()
@@ -82,21 +82,21 @@ def write_to_csv(file_path, data):
         # 定义 CSV 文件的表头
         fieldnames = ["工单编号", "违法类型", "发生地点", "发生时间", "处理状态", "处理人", "path", "处理备注"]
 
-        # 检查文件是否存在，如果不存在则写入表头
-        try:
-            with open(file_path, mode='x', newline='', encoding='utf-8') as csvfile:  # 'x' 模式会创建新文件
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writeheader()  # 写入表头
-        except FileExistsError:
-            pass  # 如果文件已存在，则跳过表头写入
+        # # 检查文件是否存在，如果不存在则写入表头
+        # try:
+        #     with open(file_path, mode='x', newline='', encoding='utf-8') as csvfile:  # 'x' 模式会创建新文件
+        #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        #         writer.writeheader()  # 写入表头
+        # except FileExistsError:
+        #     pass  # 如果文件已存在，则跳过表头写入
         # 往太极传数据
         print("开始往太极传数据")
         get_data(data)
         print("写入数据到本地")
-        # 追加写入数据
-        with open(file_path, mode='a', newline='', encoding='utf-8') as csvfile:  # 'a' 模式追加写入
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow(data)  # 写入一行数据，data是字典
+        # # 追加写入数据
+        # with open(file_path, mode='a', newline='', encoding='utf-8') as csvfile:  # 'a' 模式追加写入
+        #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        #     writer.writerow(data)  # 写入一行数据，data是字典
         # 写入临时数据库
         write_to_sqlite(data)
     else:
@@ -263,7 +263,7 @@ def process_images(
             output_image = draw_bounding_boxes(image, normalized_boxes)
 
             # 保存结果
-            csv_file_path = RESULT_PATH
+            # csv_file_path = RESULT_PATH
             output_image.save(output_path)
             # 提取出linux实际的存储路径（不是dockers路径）
             last_part = os.path.basename(output_folder)
@@ -281,7 +281,7 @@ def process_images(
                 "path": output_path,
                 "处理备注": "无备注",
             }
-            write_to_csv(csv_file_path, data)
+            write_to_csv(data)
     print("\n处理完成。")
     print(f"共发现 {matched_count} 个符合检测条件的图像")
     print(f"结果保存路径：{os.path.abspath(output_folder)}")
