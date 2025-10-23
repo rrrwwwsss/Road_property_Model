@@ -296,7 +296,7 @@ def poll_cameras(camera_list, question, output_folder):
         question (str): 当前需要处理的问题类型（例如 "wajue_question"）。
         output_folder (str): 输出文件夹路径，用于保存处理后的图像。
     """
-    print("\n占掘路、工标、井盖、悬挂物识别...")
+    print("\n工标、井盖、悬挂物识别...")
 
     for camera in camera_list:
         camera_id = camera.get("camera_id")

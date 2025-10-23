@@ -25,7 +25,6 @@ def detect_frame(question, image_base64):
                 ]
             }
         ],
-        # 参数调优
         "max_tokens": 512,  # 最大输出 token 数，限制生成回复的长度
         "do_sample": True,  # 是否启用采样（随机性），True 表示不是完全贪心搜索
         "repetition_penalty": 1.1,  # 重复惩罚系数，>1 会惩罚模型重复的内容，这里 1.0 表示不做惩罚

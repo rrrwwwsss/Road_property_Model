@@ -1,6 +1,7 @@
 ﻿import multiprocessing
 import time
 import traceback
+import threading
 
 import pandas as pd
 
@@ -11,6 +12,7 @@ from 堆放物品_摆设摊位 import poll_cameras1
 from 清理图片 import clear_begin
 from 托管本地图片到网络 import run_flask_server
 from 定期推送数据库 import tuisong_main
+from 占用挖掘公路连续帧识别 import poll_cameras2
 import sys
 # 关闭输出缓冲，解决打印堵塞问题
 sys.stdout.reconfigure(line_buffering=True)
@@ -201,47 +203,86 @@ def run_loop():
     baitan_action = {'在公路上及公路用地范围内摆摊设点': baitan_question+model_result}
     # 在模型运行前,先更新摄像头点位:id列表
 
-    try:
-        print("开始轮询擅自占用、挖掘公路", flush=True)
-        poll_cameras(updata_dianList("擅自占用、挖掘公路"), wajue_question_action, WAJUE_PATH)
-    except Exception as e:
-        print(f"[异常] 擅自占用、挖掘公路：{e}", flush=True)
-        traceback.print_exc()
+    def run_wajue():
+        try:
+            print("开始轮询擅自占用、挖掘公路", flush=True)
+            poll_cameras2(updata_dianList("擅自占用、挖掘公路"), wajue_question_action, WAJUE_PATH)
+        except Exception as e:
+            print(f"[异常] 擅自占用、挖掘公路：{e}", flush=True)
+            traceback.print_exc()
 
-    try:
-        print("开始轮询设置非公路标志", flush=True)
-        poll_cameras(updata_dianList("在公路用地范围内设置公路标志以外的其他标志"), gongbiao_action, GONGBIAO_PATH)
-    except Exception as e:
-        print(f"[异常] 设置非公路标志：{e}", flush=True)
-        traceback.print_exc()
+    # 下面五个函数每个对应一个行为
+    def run_gongbiao():
+        try:
+            print("开始轮询设置非公路标志", flush=True)
+            poll_cameras(updata_dianList("在公路用地范围内设置公路标志以外的其他标志"), gongbiao_action, GONGBIAO_PATH)
+        except Exception as e:
+            print(f"[异常] 设置非公路标志：{e}", flush=True)
+            traceback.print_exc()
 
-    try:
-        print("开始轮询井盖移动或缺失", flush=True)
-        poll_cameras(updata_dianList("在公路范围内擅自移动井盖"), jinggai_action, JINGGAI_PATH)
-    except Exception as e:
-        print(f"[异常] 井盖移动或缺失：{e}", flush=True)
-        traceback.print_exc()
+    def run_jinggai():
+        try:
+            print("开始轮询井盖移动或缺失", flush=True)
+            poll_cameras(updata_dianList("在公路范围内擅自移动井盖"), jinggai_action, JINGGAI_PATH)
+        except Exception as e:
+            print(f"[异常] 井盖移动或缺失：{e}", flush=True)
+            traceback.print_exc()
 
-    try:
-        print("开始轮询利用设施悬挂物", flush=True)
-        poll_cameras(updata_dianList("遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全"), xuangua_action, XVANGUA_PATH)
-    except Exception as e:
-        print(f"[异常] 利用附属设施悬挂物品：{e}", flush=True)
-        traceback.print_exc()
+    def run_xuangua():
+        try:
+            print("开始轮询利用设施悬挂物", flush=True)
+            poll_cameras(updata_dianList("遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全"),
+                         xuangua_action, XVANGUA_PATH)
+        except Exception as e:
+            print(f"[异常] 利用附属设施悬挂物品：{e}", flush=True)
+            traceback.print_exc()
 
-    try:
-        print("开始轮询堆放物品", flush=True)
-        poll_cameras1(duifang_list+updata_dianList("在公路上及公路用地范围内堆放物品"), duifang_action, WUPIN_PATH)
-    except Exception as e:
-        print(f"[异常] 堆放物品：{e}", flush=True)
-        traceback.print_exc()
+    def run_duifang():
+        try:
+            print("开始轮询堆放物品", flush=True)
+            poll_cameras1(duifang_list + updata_dianList("在公路上及公路用地范围内堆放物品"),
+                          duifang_action, WUPIN_PATH)
+        except Exception as e:
+            print(f"[异常] 堆放物品：{e}", flush=True)
+            traceback.print_exc()
 
-    try:
-        print("开始轮询摆设摊位", flush=True)
-        poll_cameras1(duifang_list+updata_dianList("在公路上及公路用地范围内摆摊设点"),  baitan_action, BAITAN_PATH)
-    except Exception as e:
-        print(f"[异常] 摆设摊位：{e}", flush=True)
-        traceback.print_exc()
+    def run_baitan():
+        try:
+            print("开始轮询摆设摊位", flush=True)
+            poll_cameras1(duifang_list + updata_dianList("在公路上及公路用地范围内摆摊设点"),
+                          baitan_action, BAITAN_PATH)
+        except Exception as e:
+            print(f"[异常] 摆设摊位：{e}", flush=True)
+            traceback.print_exc()
+    # 创建线程
+    t_wajue = threading.Thread(target=run_wajue)
+    t_gongbiao = threading.Thread(target=run_gongbiao)
+    t_jinggai = threading.Thread(target=run_jinggai)
+    t_xuangua = threading.Thread(target=run_xuangua)
+    t_duifang = threading.Thread(target=run_duifang)
+    t_baitan = threading.Thread(target=run_baitan)
+
+    # 启动线程（全部并行）
+    t_wajue.start()
+    t_gongbiao.start()
+    t_jinggai.start()
+    t_xuangua.start()
+    t_duifang.start()
+    t_baitan.start()
+
+    # 等待全部完成
+    t_wajue.join()
+    t_gongbiao.join()
+    t_jinggai.join()
+    t_xuangua.join()
+    t_duifang.join()
+    t_baitan.join()
+    # # 启动两个线程并行
+    # t1 = threading.Thread(target=run_wajue)
+    # t2 = threading.Thread(target=run_others)
+    #
+    # t1.start()
+    # t2.start()
 
 if __name__ == '__main__':
     import multiprocessing

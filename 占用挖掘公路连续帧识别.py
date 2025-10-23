@@ -289,7 +289,7 @@ def process_images(
     print(f"共发现 {matched_count} 个符合检测条件的图像")
     print(f"结果保存路径：{os.path.abspath(output_folder)}")
 
-def poll_cameras(camera_list, question, output_folder):
+def poll_cameras2(camera_list, question, output_folder):
     """
     轮询监控摄像头并处理图像。
 
@@ -315,13 +315,16 @@ def poll_cameras(camera_list, question, output_folder):
 
         frames = []  # 用于保存捕获的帧
 
-        for i in range(10):  # 假设捕获10帧
+        for i in range(2):  # 假设捕获5帧
             frame = capture_frame_from_camera(camera_id)
-            frames.append(frame)
-            time.sleep(1)  # 每1秒获取一次
+            if frame is None:
+                print(f"第 {i + 1} 次捕获失败（摄像头 {camera_id}）")
+            else:
+                frames.append((frame,None))
+            time.sleep(2)  # 每1秒获取一次
 
         print(f"共捕获 {len(frames)} 帧")
-        if frames is None:
+        if not frames:  # 等价于 len(frames) == 0
             print(f"网络问题，无法从摄像头 {camera_id} 获取图像")
             continue
 
