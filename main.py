@@ -4,7 +4,7 @@ import traceback
 import threading
 
 import pandas as pd
-
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from 获取摄像头点位数据 import get_dianwei_data
 from 配置 import *
 from 四项违法行为识别 import poll_cameras
@@ -71,20 +71,19 @@ You are an intelligent assistant capable of accurately identifying instances of 
 # """
 gongbiao_question = """
 Role: You are an intelligent assistant with the ability to recognize road signs or billboards. You can accurately extract and analyze the text content.
-Task: Please identify the signs or billboards on the road (please note that this refers to the road itself, not the buildings along the road. If the sign is a common one on the buildings, please ignore it!) 。 If the text content can be extracted, please determine whether it is related to "public affairs" or "personal affairs":
-Vocabulary related to "personal affairs" includes: "Welcome to **", "Advertisement of **", "Car maintenance of **", "Recruitment of **", etc.
-Vocabulary related to "public affairs" includes: 1) Vocabulary related to "transportation" (such as "Maximum load of ** tons", "Prohibition of **", "Drunk driving of **", "Transportation of **", "Drive **", "Fasten seat belt", "Section of **", "Be careful of **", etc.);
-2) Place names (such as Beijing, Shanghai, Xicheng District, Yao Guantun, Huangcun, etc.);
-3) Indicative words (such as "** parking lot", "** gas station", etc.)
-Note: There may be annotation texts related to road names in the upper left corner of the picture. These are irrelevant to the recognition task, so please ignore them! Do not recognize them as the text on the sign! If the text in the picture is difficult to recognize due to the shooting angle, lighting, or blurriness, or if you are unsure whether the text comes from an unofficial source, please reply "no" in all cases.
-Output: If the text is of personal affairs nature, please return:
-{"result": "yes",
-"bounding_boxes": [[xmin1, ymin1, xmax1, ymax1]...] ，
-"Content": The extracted text content } 
-If it is related to transportation or official matters, please return: 
-{ "result": "no", 
+Task: Please identify the signs or billboards on the road (please note: this refers to the road itself, not the buildings beside the road. If the sign is a common one on buildings, please ignore it! Also, ignore vehicle advertisements or signs). Extract the text content and determine whether it is related to "public affairs" or "personal affairs":
+Words related to "personal affairs" include: "Welcome to **", "Advertisement of **", "Vehicle Maintenance of **", "Recruitment of **", etc.
+Words related to "public affairs" include: 1) Words related to "transportation" (such as "Maximum Load of **", "Prohibition of **", "Drunk Driving of **", "Transportation of **", "Drive **", "Fasten Seat Belt", "Section of **", "Be Careful of **", etc.); 
+2) Place names (such as Beijing, Shanghai, Xicheng District, Yao Guantun, Huangcun, etc.); 
+3) Indicative words (such as "Parking Lot of **", "Gas Station of **", etc.)
+Note: There may be text annotations related to the road name in the upper left corner of the picture. These are not related to the recognition task, please ignore them! Do not recognize them as text on the sign! If the text in the picture is difficult to recognize due to the shooting angle, light, or blurriness, or if you are unsure whether the text comes from an unofficial source, please reply "no" in all cases.
+Output: If the text is of personal affairs nature, return: {"Result": "yes",
+"Bounding Box": [[xmin1, ymin1, xmax1, ymax1]... ]},
 "Content": The extracted text content }
-- The coordinates should be based on an image size of 1000x1000.
+If related to transportation or official business, reply:
+{ "Result": "no",
+"Content": The extracted text content } 
+- The coordinates should be based on a 1000x1000 image size.
 """
 # 设置悬挂物
 # xuangua_question = """
@@ -97,13 +96,10 @@ If it is related to transportation or official matters, please return:
 # Output format: If illegal items are detected hanging above the road or within the road area, please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 image size. Otherwise, please return: {"result": "no"}.
 # """
 xuangua_question = """
-Role: You are an intelligent assistant. Your task is to detect any actions that may endanger road safety by installing pipelines or hanging items on road infrastructure, and to return the position of such items in the image.
+Role: You are an intelligent assistant. Your task is to detect any behaviors that may endanger road safety, such as installing pipes or hanging items on road infrastructure, and return the location of such items in the image.
 Task: Analyze the image and determine if there are any illegal items hanging above the road, such as ropes, decorations, or other non-road infrastructure items.
-Please ignore the following:
-1. Pedestrians, vehicles (including parked vehicles) and legal road infrastructure (such as traffic signals, traffic signs, lamp posts, surveillance cameras, traffic guidance equipment, wires, etc.)
-2. Also ignore the hanging items on the buildings beside the road.
-3. Ignore the tree branches, leaves, etc. on the roadside.
-Note: If there are words on the item, extract the text and analyze the nature of the text. If it is related to traffic, public slogans, or place names, etc., ignore it. If the image is blurry, the view is obstructed due to rain or due to lighting reasons, and it is impossible to clearly see the image, reply "no" to avoid making a wrong judgment.
+Please ignore the following: 1. Pedestrians, vehicles (including parked vehicles), and legal road facilities (such as traffic signals, traffic signs, street lamp posts, surveillance cameras, traffic guidance equipment, cables, wires, etc.) 2. Ignore items hanging on roadside buildings. 3. Ignore roadside branches, leaves, and other debris. 4. Ignore some minor hanging objects, such as a small piece of rope hanging from a bridge (if it does not endanger road safety)
+Note: If there are words on the item, extract the text content and analyze its nature. If it is related to traffic, public slogans, or place names, ignore it. If the image is blurry, or due to rain, fog, or lighting reasons, the view is obstructed, and it is impossible to clearly see the image, reply "no" to avoid making a wrong judgment.
 """
 # 堆放物品
 # wupin_question = """
@@ -195,27 +191,31 @@ def updata_dianList(action):
 
     return unique_list
 def run_loop():
-    wajue_question_action = {'擅自占用、挖掘公路': wajue_question+model_result}
-    gongbiao_action = {'在公路用地范围内设置公路标志以外的其他标志': gongbiao_question}
-    jinggai_action = {'在公路范围内擅自移动井盖': jinggai_question+model_result}
-    xuangua_action = {'遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全': xuangua_question+model_result}
-    duifang_action = {'在公路上及公路用地范围内堆放物品': wupin_question+model_result}
-    baitan_action = {'在公路上及公路用地范围内摆摊设点': baitan_question+model_result}
-    # 在模型运行前,先更新摄像头点位:id列表
+    # === 只在这个层级更新一次点位列表，避免重复查询 ===
+    try:
+        wajue_list = updata_dianList("擅自占用、挖掘公路")
+        gongbiao_list = updata_dianList("在公路用地范围内设置公路标志以外的其他标志")
+        jinggai_list = updata_dianList("在公路范围内擅自移动井盖")
+        xuangua_list = updata_dianList("遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全")
+        duifang_list = updata_dianList("在公路上及公路用地范围内堆放物品")
+        baitan_list = updata_dianList("在公路上及公路用地范围内摆摊设点")
+    except Exception as e:
+        print(f"[错误] 更新摄像头点位失败: {e}", flush=True)
+        return
 
+    # 定义任务函数（简化）
     def run_wajue():
         try:
             print("开始轮询擅自占用、挖掘公路", flush=True)
-            poll_cameras2(updata_dianList("擅自占用、挖掘公路"), wajue_question_action, WAJUE_PATH)
+            poll_cameras2(wajue_list, {'擅自占用、挖掘公路': wajue_question + model_result}, WAJUE_PATH)
         except Exception as e:
             print(f"[异常] 擅自占用、挖掘公路：{e}", flush=True)
             traceback.print_exc()
 
-    # 下面五个函数每个对应一个行为
     def run_gongbiao():
         try:
             print("开始轮询设置非公路标志", flush=True)
-            poll_cameras(updata_dianList("在公路用地范围内设置公路标志以外的其他标志"), gongbiao_action, GONGBIAO_PATH)
+            poll_cameras(gongbiao_list, {'在公路用地范围内设置公路标志以外的其他标志': gongbiao_question}, GONGBIAO_PATH)
         except Exception as e:
             print(f"[异常] 设置非公路标志：{e}", flush=True)
             traceback.print_exc()
@@ -223,7 +223,7 @@ def run_loop():
     def run_jinggai():
         try:
             print("开始轮询井盖移动或缺失", flush=True)
-            poll_cameras(updata_dianList("在公路范围内擅自移动井盖"), jinggai_action, JINGGAI_PATH)
+            poll_cameras(jinggai_list, {'在公路范围内擅自移动井盖': jinggai_question + model_result}, JINGGAI_PATH)
         except Exception as e:
             print(f"[异常] 井盖移动或缺失：{e}", flush=True)
             traceback.print_exc()
@@ -231,8 +231,9 @@ def run_loop():
     def run_xuangua():
         try:
             print("开始轮询利用设施悬挂物", flush=True)
-            poll_cameras(updata_dianList("遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全"),
-                         xuangua_action, XVANGUA_PATH)
+            poll_cameras(xuangua_list, {
+                '遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全': xuangua_question + model_result},
+                         XVANGUA_PATH)
         except Exception as e:
             print(f"[异常] 利用附属设施悬挂物品：{e}", flush=True)
             traceback.print_exc()
@@ -240,8 +241,8 @@ def run_loop():
     def run_duifang():
         try:
             print("开始轮询堆放物品", flush=True)
-            poll_cameras1(duifang_list + updata_dianList("在公路上及公路用地范围内堆放物品"),
-                          duifang_action, WUPIN_PATH)
+            poll_cameras1(duifang_list + linshi_list,
+                          {'在公路上及公路用地范围内堆放物品': wupin_question + model_result}, WUPIN_PATH)
         except Exception as e:
             print(f"[异常] 堆放物品：{e}", flush=True)
             traceback.print_exc()
@@ -249,40 +250,36 @@ def run_loop():
     def run_baitan():
         try:
             print("开始轮询摆设摊位", flush=True)
-            poll_cameras1(duifang_list + updata_dianList("在公路上及公路用地范围内摆摊设点"),
-                          baitan_action, BAITAN_PATH)
+            poll_cameras1(baitan_list + linshi_list,
+                          {'在公路上及公路用地范围内摆摊设点': baitan_question + model_result}, BAITAN_PATH)
         except Exception as e:
             print(f"[异常] 摆设摊位：{e}", flush=True)
             traceback.print_exc()
-    # 创建线程
-    t_wajue = threading.Thread(target=run_wajue)
-    t_gongbiao = threading.Thread(target=run_gongbiao)
-    t_jinggai = threading.Thread(target=run_jinggai)
-    t_xuangua = threading.Thread(target=run_xuangua)
-    t_duifang = threading.Thread(target=run_duifang)
-    t_baitan = threading.Thread(target=run_baitan)
 
-    # 启动线程（全部并行）
-    t_wajue.start()
-    t_gongbiao.start()
-    t_jinggai.start()
-    t_xuangua.start()
-    t_duifang.start()
-    t_baitan.start()
 
-    # 等待全部完成
-    t_wajue.join()
-    t_gongbiao.join()
-    t_jinggai.join()
-    t_xuangua.join()
-    t_duifang.join()
-    t_baitan.join()
-    # # 启动两个线程并行
-    # t1 = threading.Thread(target=run_wajue)
-    # t2 = threading.Thread(target=run_others)
-    #
-    # t1.start()
-    # t2.start()
+
+    # 定义所有任务（函数列表）
+
+    tasks = [
+        run_wajue,  # 注意：这里只是函数名，不加 ()
+        run_gongbiao,
+        run_jinggai,
+        run_xuangua,
+        run_duifang,
+        run_baitan,
+    ]
+    with ThreadPoolExecutor(max_workers=6) as executor:
+            # 提交所有任务
+        future_to_func = {executor.submit(task): task.__name__ for task in tasks}
+            # 2. 等待任务完成（谁先完成谁先处理）
+        for future in as_completed(future_to_func):
+            func_name = future_to_func[future]  # 拿到函数名
+            try:
+                result = future.result()  # 获取返回值（如果有）
+                print(f"[成功] {func_name} 执行完成")
+            except Exception as e:
+                print(f"[异常] {func_name} 执行失败: {e}")
+                traceback.print_exc()
 
 if __name__ == '__main__':
     import multiprocessing
@@ -314,6 +311,6 @@ if __name__ == '__main__':
     while True:
         run_loop()
         print("等待5分钟后继续下一轮操作...")
-        time.sleep(300)  # 5分钟
+        time.sleep(60)  # 5分钟
 
 

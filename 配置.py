@@ -146,8 +146,7 @@ linshi_list = [{'camera_id': '11011101071328110008', 'monitor_point': 'G5京昆�
 
 
 
-duifang_list = linshi_list
-baitan_list = linshi_list
+
 
 # if __name__ == '__main__':
 #     print(len(linshi_list))
