@@ -18,6 +18,7 @@ XVANGUA_PATH = DATA_BASE_PATH + "/xuangua"
 # RESULT_PATH = "/app/result.csv"
 CAMERA_DATA = "./data/《视频点位确认表》 0620.xlsx" # 摄像头点位信息，相对路径
 CAMERA_RESULT_DATA = "./data/result_with_camera_id.csv"# 整合数据后的摄像头点位信息，相对路径
+XVANGUA_TICHU = "./data/悬挂物剔除区域.csv"
 
 # 许可数据库配置
 XVKE_DB_CONFIG = {

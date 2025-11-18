@@ -1,3 +1,4 @@
+import ast
 import json
 import sqlite3
 
@@ -10,8 +11,11 @@ from datetime import datetime, timedelta
 import os
 from PIL import Image
 import numpy as np
+
+from 给图像打马赛克 import apply_mosaic_on_polygon
 from 配置 import *
 import csv
+from 查询许可数据库 import job
 
 def write_to_sqlite(data):
     conn = sqlite3.connect(TEMPORARY_RECORD)
@@ -76,6 +80,41 @@ def write_to_csv(data):
         # 发生时间列各元组 - data[发生时间]（datetime类型） 的绝对值要小于8
         ((wupin_tanwei_pd["发生时间"] - data_time).abs() <= time_diff)
         ]
+
+
+    try:
+        query_results = job()
+
+        if data["违法类型"] == "擅自占用、挖掘公路":
+            # 从 query_results['zhanwagonglu'] 中找有没有 constructaddress = data["发生地点"]
+            matched_addresses = [
+                item for item in query_results.get("zhanwagonglu", [])
+                if item.get("constructaddress") == data["发生地点"]
+            ]
+
+            if matched_addresses:
+                # 如果匹配上，则清空结果
+                filtered_df = pd.DataFrame(columns=wupin_tanwei_pd.columns)
+                print("已经有许可信息，不是违法行为")
+            else:
+                print("没有许可信息")
+
+        elif data["违法类型"] == "在公路用地范围内设置公路标志以外的其他标志":
+            # 从 query_results['feigongbiao'] 中找有没有 constructaddress = data["发生地点"]
+            matched_addresses = [
+                item for item in query_results.get("feigongbiao", [])
+                if item.get("constructaddress") == data["发生地点"]
+            ]
+
+            if matched_addresses:
+                # 如果匹配上，则清空结果
+                filtered_df = pd.DataFrame(columns=wupin_tanwei_pd.columns)
+                print("已经有许可信息，不是违法行为")
+            else:
+                print("没有许可信息")
+    except Exception as e:
+        print(f"校验 query_results 出错: {e}")
+        # 出错也不影响后续运行
 
     # 如果临时数据库里没有发生地点、违法类型一致，且发生时间在 8 小时以内的行为，则执行上传逻辑
     if filtered_df.empty:
@@ -156,10 +195,35 @@ def process_images(
     matched_count = 0
     for idx, (image_data, source_path) in enumerate(image_list, 1):
         print(f"\n处理第 {idx}/{len(image_list)} 个图像...")
-        # 加载图像
-        if image_data is not None:
-            image = image_data
-        else:
+
+        def get_points_from_csv(csv_path, target_location):
+            # 读取 CSV 文件
+            df = pd.read_csv(csv_path)
+
+            # 查找目标位置的行
+            target_row = df[df['点位'] == target_location]  # 假设列名是 '位置'
+
+            if not target_row.empty:
+                # 获取 '区域' 列的值（假设列名是 '区域'）
+                region_str = target_row['区域'].values[0]
+
+                # 将字符串转换为 Python 列表
+                points = ast.literal_eval(region_str)
+                return points
+            else:
+                print(f"未找到指定位置: {target_location}")
+                return None
+        print('点位名称：',monitor_point)
+        try:
+            if action_name == '遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全':
+                points = get_points_from_csv(XVANGUA_TICHU, monitor_point)
+                if points:
+                    image = apply_mosaic_on_polygon(the_path,points,5)
+                else:
+                    image = image_data
+            else:
+                image = Image.open(source_path)
+        except Exception as e:
             image = Image.open(source_path)
 
         # 调用模型识别模块输入提示词进行图像的识别，返回识别结果output_text
