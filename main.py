@@ -188,81 +188,6 @@ def updata_dianList(action):
 
     return unique_list
 def run_loop():
-    # 定义任务函数（简化）
-    def run_wajue():
-        while True:
-            try:
-                wajue_list = updata_dianList("擅自占用、挖掘公路")
-                print("开始轮询擅自占用、挖掘公路", flush=True)
-                poll_cameras2(wajue_list, {'擅自占用、挖掘公路': wajue_question + model_result}, WAJUE_PATH)
-            except Exception as e:
-                print(f"[异常] 擅自占用、挖掘公路：{e}", flush=True)
-                traceback.print_exc()
-            time.sleep(60)
-            print("占掘路点位已轮询一遍")
-
-    def run_gongbiao():
-        while True:
-            try:
-                gongbiao_list = updata_dianList("在公路用地范围内设置公路标志以外的其他标志")
-                print("开始轮询设置非公路标志", flush=True)
-                poll_cameras(gongbiao_list, {'在公路用地范围内设置公路标志以外的其他标志': gongbiao_question}, GONGBIAO_PATH)
-            except Exception as e:
-                print(f"[异常] 设置非公路标志：{e}", flush=True)
-                traceback.print_exc()
-            time.sleep(60)
-            print("非公路标志点位已轮询一遍")
-
-    def run_jinggai():
-        while True:
-            try:
-                jinggai_list = updata_dianList("在公路范围内擅自移动井盖")
-                print("开始轮询井盖移动或缺失", flush=True)
-                poll_cameras(jinggai_list, {'在公路范围内擅自移动井盖': jinggai_question + model_result}, JINGGAI_PATH)
-            except Exception as e:
-                print(f"[异常] 井盖移动或缺失：{e}", flush=True)
-                traceback.print_exc()
-            time.sleep(60)
-            print("井盖缺失点位已轮询一遍")
-    def run_xuangua():
-        while True:
-            try:
-                xuangua_list = updata_dianList("遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全")
-                print("开始轮询利用设施悬挂物", flush=True)
-                poll_cameras(xuangua_list, {
-                    '遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全': xuangua_question + model_result},
-                             XVANGUA_PATH)
-            except Exception as e:
-                print(f"[异常] 利用附属设施悬挂物品：{e}", flush=True)
-                traceback.print_exc()
-            time.sleep(60)
-            print("悬挂物点位已轮询一遍")
-
-    def run_duifang():
-        while True:
-            try:
-                duifang_list = updata_dianList("在公路上及公路用地范围内堆放物品")
-                print("开始轮询堆放物品", flush=True)
-                poll_cameras1(duifang_list + linshi_list,
-                              {'在公路上及公路用地范围内堆放物品': wupin_question + model_result}, WUPIN_PATH)
-            except Exception as e:
-                print(f"[异常] 堆放物品：{e}", flush=True)
-                traceback.print_exc()
-            time.sleep(60)
-
-            print("堆放物品点位已轮询一遍")
-    def run_baitan():
-        while True:
-            try:
-                baitan_list = updata_dianList("在公路上及公路用地范围内摆摊设点")
-                print("开始轮询摆设摊位", flush=True)
-                poll_cameras1(baitan_list + linshi_list,
-                              {'在公路上及公路用地范围内摆摊设点': baitan_question + model_result}, BAITAN_PATH)
-            except Exception as e:
-                print(f"[异常] 摆设摊位：{e}", flush=True)
-                traceback.print_exc()
-            time.sleep(60)
-            print("摆设摊位点位已轮询一遍")
 
     def gaopin():
         while True:
@@ -336,12 +261,6 @@ def run_loop():
         # === 关键：使用 threading.Thread 并设置为守护线程 ===
 
     tasks = [
-        # run_wajue,
-        # run_gongbiao,
-        # run_jinggai,
-        # run_xuangua,
-        # run_duifang,
-        # run_baitan,
         gaopin,
         dipin,
     ]

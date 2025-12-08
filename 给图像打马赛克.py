@@ -35,6 +35,7 @@ def apply_mosaic_on_polygon(pil_image, points, kernel_size=(15, 15)):
 
     # 转换 OpenCV 图像到 Pillow 图像
     pil_image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    pil_image.save("加黑框.jpg")
     print("已对该区域做遮挡处理")
     # # 显示处理后的图片
     # cv2.imshow("Mosaic Image", image)

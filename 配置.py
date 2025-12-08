@@ -15,6 +15,7 @@ GONGBIAO_PATH = DATA_BASE_PATH + "/gongbiao"
 WAJUE_PATH = DATA_BASE_PATH + "/wajue"
 JINGGAI_PATH = DATA_BASE_PATH + "/jinggai"
 XVANGUA_PATH = DATA_BASE_PATH + "/xuangua"
+DUOZHEN_PATH = DATA_BASE_PATH + "/duozhen"
 # RESULT_PATH = "/app/result.csv"
 CAMERA_DATA = "./data/《视频点位确认表》 0620.xlsx" # 摄像头点位信息，相对路径
 CAMERA_RESULT_DATA = "./data/result_with_camera_id.csv"# 整合数据后的摄像头点位信息，相对路径
