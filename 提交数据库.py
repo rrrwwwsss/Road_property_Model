@@ -58,7 +58,8 @@ def insert_database(data):
             "VIOLATION_TYPE": data['违法类型'],
             "LOCATION": data['发生地点'],
             "VIOLATION_TIME": datetime.strptime(data['发生时间'], "%Y%m%d_%H%M%S").strftime("%Y-%m-%d %H:%M:%S"),
-            "IMAGE_PATH": data['图片路径']
+            "IMAGE_PATH": data['图片路径'],
+            "LEVEL":'中'
           }
         ]
       }
@@ -72,7 +73,8 @@ def insert_database(data):
         "STATUS": "处理状态",
         "HANDLER": "处理人",
         "IMAGE_PATH": "图片路径",
-        "REMARK": "处理备注"
+        "REMARK": "处理备注",
+        "LEVEL":"推送分级分类"
     }
     import 数据库配置
     if 数据库配置.IS_SUBMIT == True:

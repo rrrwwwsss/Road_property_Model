@@ -38,7 +38,7 @@ class Logger:
                 filename=log_file,
                 when="midnight",     # 每天轮转
                 interval=1,          # 时间间隔（1 天）
-                backupCount=7,       # 保留 7 个旧日志文件
+                backupCount=180,       # 保留 7 个旧日志文件
                 encoding="utf-8"     # 支持中文
             )
 
