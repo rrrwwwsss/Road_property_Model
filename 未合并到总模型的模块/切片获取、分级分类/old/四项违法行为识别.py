@@ -1,7 +1,6 @@
+import ast
 import json
-import multiprocessing
 import sqlite3
-import time
 
 import pandas as pd
 
@@ -12,40 +11,11 @@ from datetime import datetime, timedelta
 import os
 from PIL import Image
 import numpy as np
+
+from 给图像打马赛克 import apply_mosaic_on_polygon
 from 配置 import *
 import csv
 from 查询许可数据库 import job
-
-def jieqvduozhen(data,camera_id):
-    frames = []
-    for i in range(5):  # 假设捕获5帧
-        frame = capture_frame_from_camera(camera_id)
-        if frame is None:
-            print(f"第 {i + 1} 次捕获失败（摄像头 {camera_id}）")
-        else:
-            frames.append((frame, None))
-        time.sleep(60)  # 每1秒获取一次
-    save_path_list = [data['path']]
-    for idx, (image_data, source_path) in enumerate(frames, 1):
-        print(f"\n处理第 {idx}/{len(frames)} 个图像...")
-        # 加载图像
-        if image_data is not None:
-            image = image_data
-        else:
-            image = Image.open(source_path)
-        # 处理阳性结果
-        current_time = datetime.now()
-        future_time = current_time + timedelta(minutes=10, seconds=52)
-        # 生成时间戳文件名
-        timestamp = future_time.strftime("%Y%m%d_%H%M%S")
-        filename = f"camera_{camera_id}_{timestamp}.jpg"
-        last_part = os.path.basename(DUOZHEN_PATH)
-        save_path = os.path.join(LINUX_PIC_PAT + last_part, filename)
-        image.save(save_path)
-        save_path_list.append(save_path)
-    data['path'] = save_path_list
-    write_to_csv(data)
-    return ""
 
 def write_to_sqlite(data):
     conn = sqlite3.connect(TEMPORARY_RECORD)
@@ -111,6 +81,7 @@ def write_to_csv(data):
         ((wupin_tanwei_pd["发生时间"] - data_time).abs() <= time_diff)
         ]
 
+
     try:
         query_results = job()
 
@@ -170,7 +141,7 @@ def write_to_csv(data):
     else:
         return "8小时内已上传过该行为"
 def process_images(
-        cv2_img_list,
+        the_path,
         action,
         monitor_point,
         output_folder="output",
@@ -195,23 +166,23 @@ def process_images(
     os.makedirs(output_folder, exist_ok=True)
 
     # 处理输入类型
-    image_list = cv2_img_list
-    # if isinstance(the_path, (Image.Image, np.ndarray)):
-    #     image_list.append((the_path, None))  # 仅存储图像数据
-    # elif isinstance(the_path, str):
-    #     if os.path.isdir(the_path):
-    #         for f in os.listdir(the_path):
-    #             ext = os.path.splitext(f)[1].lower()
-    #             if ext in image_extensions:
-    #                 image_list.append((None, os.path.join(the_path, f)))
-    #     elif os.path.isfile(the_path):
-    #         ext = os.path.splitext(the_path)[1].lower()
-    #         if ext in image_extensions:
-    #             image_list.append((None, the_path))
-    #     else:
-    #         raise ValueError(f"路径不存在：{the_path}")
-    # else:
-    #     raise TypeError("输入类型必须是路径或图像对象")
+    image_list = []
+    if isinstance(the_path, (Image.Image, np.ndarray)):
+        image_list.append((the_path, None))  # 仅存储图像数据
+    elif isinstance(the_path, str):
+        if os.path.isdir(the_path):
+            for f in os.listdir(the_path):
+                ext = os.path.splitext(f)[1].lower()
+                if ext in image_extensions:
+                    image_list.append((None, os.path.join(the_path, f)))
+        elif os.path.isfile(the_path):
+            ext = os.path.splitext(the_path)[1].lower()
+            if ext in image_extensions:
+                image_list.append((None, the_path))
+        else:
+            raise ValueError(f"路径不存在：{the_path}")
+    else:
+        raise TypeError("输入类型必须是路径或图像对象")
 
     # 检查有效输入
     if not image_list:
@@ -222,16 +193,39 @@ def process_images(
 
     # 处理每个图像
     matched_count = 0
-    resuly_list = []
-    result_dict = {}
-    image = None
     for idx, (image_data, source_path) in enumerate(image_list, 1):
+
         print(f"\n处理第 {idx}/{len(image_list)} 个图像...")
-        # 加载图像
-        if image_data is not None:
+
+        def get_points_from_csv(csv_path, target_location):
+            # 读取 CSV 文件
+            df = pd.read_csv(csv_path)
+
+            # 查找目标位置的行
+            target_row = df[df['点位'] == target_location]  # 假设列名是 '位置'
+
+            if not target_row.empty:
+                # 获取 '区域' 列的值（假设列名是 '区域'）
+                region_str = target_row['区域'].values[0]
+
+                # 将字符串转换为 Python 列表
+                points = ast.literal_eval(region_str)
+                return points
+            else:
+                print(f"该点位并不需要对悬挂物做遮挡处理: {target_location}")
+                return None
+        print('点位名称：',monitor_point)
+        try:
+            if action_name == '遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全':
+                points = get_points_from_csv(XVANGUA_TICHU, monitor_point)
+                if points:
+                    image = apply_mosaic_on_polygon(the_path,points,5)
+                else:
+                    image = image_data
+            else:
+                image = image_data
+        except Exception as e:
             image = image_data
-        else:
-            image = Image.open(source_path)
 
         # 调用模型识别模块输入提示词进行图像的识别，返回识别结果output_text
         from 模型识别_docker import pattern_recognition
@@ -285,9 +279,8 @@ def process_images(
             return result_dict
         result_dict = validate_boxes(result_dict)
         final_answer = result_dict.get("result", "不存在")
+        print('监控点位:', monitor_point)
         print(f"检测结果：{final_answer}")
-        resuly_list.append(final_answer)
-    if all(x == 'yes' for x in resuly_list):
         # 尝试解析 JSON
 
         # result_dict = json.loads(output_text)
@@ -295,74 +288,70 @@ def process_images(
         # print(f"检测结果：{final_answer}")
 
         # 处理阳性结果
-        current_time = datetime.now()
-        future_time = current_time + timedelta(minutes=10, seconds=52)
-        # 生成时间戳文件名
-        timestamp = future_time.strftime("%Y%m%d_%H%M%S")
-        filename = f"camera_{camera_id}_{timestamp}.jpg"
-        output_path = os.path.join(output_folder, filename)
+        if final_answer == "yes":
+            current_time = datetime.now()
+            future_time = current_time + timedelta(minutes=10, seconds=52)
+            # 生成时间戳文件名
+            timestamp = future_time.strftime("%Y%m%d_%H%M%S")
+            filename = f"camera_{camera_id}_{timestamp}.jpg"
+            output_path = os.path.join(output_folder, filename)
 
-        # 绘制边界框
-        original_width, original_height = image.size
-        normalized_boxes = result_dict.get("bounding_boxes")
+            # 绘制边界框
+            original_width, original_height = image.size
+            normalized_boxes = result_dict.get("bounding_boxes")
 
-        if not normalized_boxes:
-            print("没有 bounding_boxes，直接跳出循环")
-        rescaled_boxes = rescale_bounding_boxes(
-            normalized_boxes,
-            original_width,
-            original_height
-        )
+            if not normalized_boxes:
+                print("没有 bounding_boxes，直接跳出循环")
+                break
+            rescaled_boxes = rescale_bounding_boxes(
+                normalized_boxes,
+                original_width,
+                original_height
+            )
 
-        # 保存这个没标框的违法图像
-        # 假设 image 是你的PIL Image对象
-        save_dir = './shibie_yuantu/' + output_folder.rsplit('/', 1)[-1]  # 提取出违法行为保存的路径
+            # 保存这个没标框的违法图像
+            # 假设 image 是你的PIL Image对象
+            save_dir = './shibie_yuantu/'+output_folder.rsplit('/', 1)[-1] #提取出违法行为保存的路径
 
-        # 判断文件夹是否存在，不存在就创建
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
+            # 判断文件夹是否存在，不存在就创建
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
 
-        # 拼接保存路径，文件名可以自己定，比如用“output.png”
-        save_path = os.path.join(save_dir, filename)
+            # 拼接保存路径，文件名可以自己定，比如用“output.png”
+            save_path = os.path.join(save_dir, filename)
 
-        # 保存图片
-        image.save(save_path)
-        print(f"图片已保存到 {save_path}")
-        # rescaled_boxes是根据大模型返回的1000*1000标准坐标处理得到的原始坐标，但72b大模型不会返回1000*1000的标准坐标，只返回原始坐标，
-        # 因此使用72b大模型时不用转换，直接使用normalized_boxes
-        # 给图像标框
-        output_image = draw_bounding_boxes(image, normalized_boxes)
+            # 保存图片
+            image.save(save_path)
+            print(f"图片已保存到 {save_path}")
+            # rescaled_boxes是根据大模型返回的1000*1000标准坐标处理得到的原始坐标，但72b大模型不会返回1000*1000的标准坐标，只返回原始坐标，
+            # 因此使用72b大模型时不用转换，直接使用normalized_boxes
+            # 给图像标框
+            output_image = draw_bounding_boxes(image, normalized_boxes)
 
-        # 保存结果
-        # csv_file_path = RESULT_PATH
-        output_image.save(output_path)
-        # 提取出linux实际的存储路径（不是dockers路径）
-        last_part = os.path.basename(output_folder)
-        output_path = os.path.join(LINUX_PIC_PAT + last_part, filename)
-        print(f"★ 发现目标，已保存至 linux存放路径：{output_path}")
-        matched_count += 1
-        the_type = action_name
-        data = {
-            "工单编号": filename,
-            "违法类型": the_type,
-            "发生地点": monitor_point,
-            "发生时间": timestamp,
-            "处理状态": "待处理",
-            "处理人": "执法员",
-            "path": output_path,
-            "处理备注": "无备注",
-        }
-        # 创建子进程来处理图片
-        process = multiprocessing.Process(target=jieqvduozhen,
-                                          args=(data,camera_id))
-        process.start()
-
-
-    print("\n处理完成,正在截取多张帧.......")
-    # print(f"共发现 {matched_count} 个符合检测条件的图像")
-    # print(f"结果保存路径：{os.path.abspath(output_folder)}")
-
-def poll_cameras2(camera_list, question, output_folder):
+            # 保存结果
+            # csv_file_path = RESULT_PATH
+            output_image.save(output_path)
+            # 提取出linux实际的存储路径（不是dockers路径）
+            last_part = os.path.basename(output_folder)
+            output_path = os.path.join(LINUX_PIC_PAT + last_part, filename)
+            print(f"★ 发现目标，已保存至 linux存放路径：{output_path}")
+            matched_count += 1
+            the_type = action_name
+            data = {
+                "工单编号": filename,
+                "违法类型": the_type,
+                "发生地点": monitor_point,
+                "发生时间": timestamp,
+                "处理状态": "待处理",
+                "处理人": "执法员",
+                "path": output_path,
+                "处理备注": "无备注",
+            }
+            write_to_csv(data)
+    print("\n处理完成。")
+    print(f"共发现 {matched_count} 个符合检测条件的图像")
+    print(f"结果保存路径：{os.path.abspath(output_folder)}")
+def poll_cameras(camera_list, question, output_folder):
     """
     轮询监控摄像头并处理图像。
 
@@ -373,7 +362,7 @@ def poll_cameras2(camera_list, question, output_folder):
         question (str): 当前需要处理的问题类型（例如 "wajue_question"）。
         output_folder (str): 输出文件夹路径，用于保存处理后的图像。
     """
-    print("\n占掘路识别...")
+    print("\n工标、井盖、悬挂物识别...")
 
     for camera in camera_list:
         camera_id = camera.get("camera_id")
@@ -384,22 +373,10 @@ def poll_cameras2(camera_list, question, output_folder):
             continue
 
         # 获取摄像头的一帧图像
-        import time
-
-        frames = []  # 用于保存捕获的帧
-
-        for i in range(2):  # 假设捕获5帧
-            frame = capture_frame_from_camera(camera_id)
-            if frame is None:
-                print(f"第 {i + 1} 次捕获失败（摄像头 {camera_id}）")
-            else:
-                frames.append((frame,None))
-            time.sleep(2)  # 每1秒获取一次
-
-        print(f"共捕获 {len(frames)} 帧")
-        if not frames:  # 等价于 len(frames) == 0
+        frame = capture_frame_from_camera(camera_id)
+        if frame is None:
             print(f"网络问题，无法从摄像头 {camera_id} 获取图像")
             continue
 
         # 处理图像并保存到指定输出文件夹
-        process_images(frames, question, output_folder=output_folder, monitor_point=monitor_point, camera_id=camera_id)
+        process_images(frame, question, output_folder=output_folder, monitor_point=monitor_point, camera_id=camera_id)

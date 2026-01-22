@@ -59,6 +59,9 @@ def pil_image_to_base64(img):
 
 def pattern_recognition(question, image):
     # 假设 image 是 PIL Image 对象
+    if image is None:
+        print('没截取到图片，不交给大模型')
+        return None
     img_b64 = pil_image_to_base64(image)
     response = detect_frame(question, img_b64)  # 返回的是 list，比如 [str]
 

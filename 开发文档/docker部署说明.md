@@ -19,7 +19,7 @@ htc/highway_property是镜像名 250606是标签
 ## 5.停止容器
 ```docker stop debris-detector```debris-detector是容器名  
 ```docker rm -f debris-detector``` 删除  
-```docker compose restart debris-detector``` 用docker-compose.yml重启容器
+```docker compose restart debris-detector``` 重启容器（但不会重新读取yml配置）
 ## 6.日志查看
 
 ### 1.实时查看日志

@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from PIL import Image, ImageDraw
 # 从文本中安全解析出 [xmin, ymin, xmax, ymax] 的边框数据
@@ -51,3 +52,39 @@ def rescale_bounding_boxes(bounding_boxes, original_width, original_height, scal
         ]
         rescaled_boxes.append(rescaled_box)
     return rescaled_boxes
+
+def jiance_imgtype(frame):
+    # 情况1: 是字符串（路径）
+    if isinstance(frame, str):
+        if os.path.isfile(frame) and frame.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp', '.webp')):
+            image_list = [frame]
+        else:
+            print(f"无效图像路径: {frame}")
+            return  # 或 raise
+
+    # 情况2: 是单个 PIL Image
+    elif isinstance(frame, Image.Image):
+        image_list = [frame]
+
+    # 情况3: 是图像列表（路径或 PIL Image）
+    elif isinstance(frame, (list, tuple)):
+        image_list = []
+        for item in frame:
+            if isinstance(item, str) and os.path.isfile(item) and item.lower().endswith(('.jpg', '.jpeg', '.png', '.bmp', '.webp')):
+                image_list.append(item)
+            elif isinstance(item, Image.Image):
+                image_list.append(item)
+            else:
+                print(f"跳过无效图像项: {item}")
+
+    # 情况4: None 或其他无效类型
+    else:
+        print(f"无法处理的输入类型: {type(frame)}, 值: {frame}")
+        return  # 安静退出，不报错
+
+    if not image_list:
+        print("未找到有效图像，跳过处理")
+        return
+
+    print(f"发现 {len(image_list)} 个图像需要处理...")
+    return image_list

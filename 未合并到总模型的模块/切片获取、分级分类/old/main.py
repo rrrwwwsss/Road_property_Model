@@ -4,11 +4,12 @@ import threading
 import pandas as pd
 from 获取摄像头点位数据 import get_dianwei_data
 from 配置 import *
-from 从接口获取数据并分配给模型 import *
+from 四项违法行为识别 import poll_cameras
+from 堆放物品_摆设摊位 import poll_cameras1
 from 清理图片 import clear_begin
 from 托管本地图片到网络 import run_flask_server
 from 定期推送数据库 import tuisong_main
-
+from 占用挖掘公路连续帧识别 import poll_cameras2
 import sys
 # 关闭输出缓冲，解决打印堵塞问题
 sys.stdout.reconfigure(line_buffering=True)
@@ -74,11 +75,11 @@ Words related to "public affairs" include: 1) Words related to "transportation" 
 2) Place names (such as Beijing, Shanghai, Xicheng District, Yao Guantun, Huangcun, etc.); 
 3) Indicative words (such as "Parking Lot of **", "Gas Station of **", etc.)
 Note: There may be text annotations related to the road name in the upper left corner of the picture. These are not related to the recognition task, please ignore them! Do not recognize them as text on the sign! If the text in the picture is difficult to recognize due to the shooting angle, light, or blurriness, or if you are unsure whether the text comes from an unofficial source, please reply "no" in all cases.
-Output: If the text is of personal affairs nature, return: {"result": "yes",
-"bounding_boxes": [[xmin1, ymin1, xmax1, ymax1]... ]},
+Output: If the text is of personal affairs nature, return: {"Result": "yes",
+"Bounding Box": [[xmin1, ymin1, xmax1, ymax1]... ]},
 "Content": The extracted text content }
 If related to transportation or official business, reply:
-{ "result": "no",
+{ "Result": "no",
 "Content": The extracted text content } 
 - The coordinates should be based on a 1000x1000 image size.
 """
@@ -192,23 +193,46 @@ def run_loop():
     def gaopin():
         while True:
             try:
-                # wajue_list = updata_dianList("擅自占用、挖掘公路")
+                wajue_list = updata_dianList("擅自占用、挖掘公路")
                 print("开始轮询擅自占用、挖掘公路", flush=True)
-                chuli({'擅自占用、挖掘公路': wajue_question + model_result}, WAJUE_PATH)
+                poll_cameras2(wajue_list, {'擅自占用、挖掘公路': wajue_question + model_result}, WAJUE_PATH)
             except Exception as e:
                 print(f"[异常] 擅自占用、挖掘公路：{e}", flush=True)
                 traceback.print_exc()
             time.sleep(60)
             print("占掘路点位已轮询一遍")
 
-
-
-    def zhongpin():
-        while True:
             try:
-                # duifang_list = updata_dianList("在公路上及公路用地范围内堆放物品")
+                baitan_list = updata_dianList("在公路上及公路用地范围内摆摊设点")
+                print("开始轮询摆设摊位", flush=True)
+                poll_cameras1(baitan_list + linshi_list,
+                              {'在公路上及公路用地范围内摆摊设点': baitan_question + model_result}, BAITAN_PATH)
+            except Exception as e:
+                print(f"[异常] 摆设摊位：{e}", flush=True)
+                traceback.print_exc()
+            time.sleep(60)
+            print("摆设摊位点位已轮询一遍")
+
+    def dipin():
+        while True:
+
+            try:
+                xuangua_list = updata_dianList("遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全")
+                print("开始轮询利用设施悬挂物", flush=True)
+                poll_cameras(xuangua_list, {
+                    '遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全': xuangua_question + model_result},
+                             XVANGUA_PATH)
+            except Exception as e:
+                print(f"[异常] 利用附属设施悬挂物品：{e}", flush=True)
+                traceback.print_exc()
+            time.sleep(60)
+            print("悬挂物点位已轮询一遍")
+
+            try:
+                duifang_list = updata_dianList("在公路上及公路用地范围内堆放物品")
                 print("开始轮询堆放物品", flush=True)
-                chuli({'在公路上及公路用地范围内堆放物品': wupin_question + model_result}, WUPIN_PATH)
+                poll_cameras1(duifang_list + linshi_list,
+                              {'在公路上及公路用地范围内堆放物品': wupin_question + model_result}, WUPIN_PATH)
             except Exception as e:
                 print(f"[异常] 堆放物品：{e}", flush=True)
                 traceback.print_exc()
@@ -217,30 +241,9 @@ def run_loop():
             print("堆放物品点位已轮询一遍")
 
             try:
-                # baitan_list = updata_dianList("在公路上及公路用地范围内摆摊设点")
-                print("开始轮询摆设摊位", flush=True)
-                chuli({'在公路上及公路用地范围内摆摊设点': baitan_question + model_result}, BAITAN_PATH)
-            except Exception as e:
-                print(f"[异常] 摆设摊位：{e}", flush=True)
-                traceback.print_exc()
-            time.sleep(60)
-            print("摆设摊位点位已轮询一遍")
-    def dipin():
-        while True:
-            try:
-                # xuangua_list = updata_dianList("遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全")
-                print("开始轮询利用设施悬挂物", flush=True)
-                chuli({'遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全': xuangua_question + model_result}, XVANGUA_PATH)
-            except Exception as e:
-                print(f"[异常] 利用附属设施悬挂物品：{e}", flush=True)
-                traceback.print_exc()
-            time.sleep(60)
-            print("悬挂物点位已轮询一遍")
-
-            try:
-                # jinggai_list = updata_dianList("在公路范围内擅自移动井盖")
+                jinggai_list = updata_dianList("在公路范围内擅自移动井盖")
                 print("开始轮询井盖移动或缺失", flush=True)
-                chuli( {'在公路范围内擅自移动井盖': jinggai_question + model_result}, JINGGAI_PATH)
+                poll_cameras(jinggai_list, {'在公路范围内擅自移动井盖': jinggai_question + model_result}, JINGGAI_PATH)
             except Exception as e:
                 print(f"[异常] 井盖移动或缺失：{e}", flush=True)
                 traceback.print_exc()
@@ -248,21 +251,18 @@ def run_loop():
             print("井盖缺失点位已轮询一遍")
 
             try:
-                # gongbiao_list = updata_dianList("在公路用地范围内设置公路标志以外的其他标志")
+                gongbiao_list = updata_dianList("在公路用地范围内设置公路标志以外的其他标志")
                 print("开始轮询设置非公路标志", flush=True)
-                chuli( {'在公路用地范围内设置公路标志以外的其他标志': gongbiao_question}, GONGBIAO_PATH)
+                poll_cameras(gongbiao_list, {'在公路用地范围内设置公路标志以外的其他标志': gongbiao_question}, GONGBIAO_PATH)
             except Exception as e:
                 print(f"[异常] 设置非公路标志：{e}", flush=True)
                 traceback.print_exc()
             time.sleep(60)
             print("非公路标志点位已轮询一遍")
-
-
         # === 关键：使用 threading.Thread 并设置为守护线程 ===
 
     tasks = [
         gaopin,
-        zhongpin,
         dipin,
     ]
 

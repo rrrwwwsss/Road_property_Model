@@ -1,10 +1,9 @@
-import ast
 import json
 import sqlite3
-from 给图像打马赛克 import apply_mosaic_on_polygon
+
 import pandas as pd
 from 模型识别_docker import pattern_recognition
-from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes, jiance_imgtype
+from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
 from 整合数据 import get_data
 from 摄像头截帧 import capture_frame_from_camera
 from datetime import datetime, timedelta
@@ -13,7 +12,6 @@ from PIL import Image
 import numpy as np
 from 配置 import *
 import csv
-from 从数据库获取图片 import *
 from 查询许可数据库 import job
 def write_to_sqlite(data):
     conn = sqlite3.connect(TEMPORARY_RECORD)
@@ -69,7 +67,7 @@ def write_to_csv(data):
     wupin_tanwei_pd["发生时间"] = pd.to_datetime(wupin_tanwei_pd["发生时间"], format="%Y%m%d_%H%M%S")
 
     # 计算 8 小时的时间差
-    time_diff = timedelta(hours=CHONGFU_TIME)
+    time_diff = timedelta(hours=16)
 
     # 筛选条件：发生地点、违法类型一致，且发生时间在 8 小时以内
     filtered_df = wupin_tanwei_pd[
@@ -136,14 +134,13 @@ def write_to_csv(data):
         # 写入临时数据库
         write_to_sqlite(data)
     else:
-        return str(CHONGFU_TIME)+"小时内已上传过该行为"
+        return "8小时内已上传过该行为"
 def process_images(
         cv2_img_list,
         action,
         monitor_point,
         output_folder="output",
         camera_id="",
-        action_time='未知',
         image_extensions=('.jpg', '.jpeg', '.png', '.bmp', '.webp')
 ):
     """
@@ -164,8 +161,7 @@ def process_images(
     os.makedirs(output_folder, exist_ok=True)
 
     # 处理输入类型
-    image_list = [cv2_img_list]
-    # image_list = jiance_imgtype(cv2_img_list)
+    image_list = cv2_img_list
     # if isinstance(the_path, (Image.Image, np.ndarray)):
     #     image_list.append((the_path, None))  # 仅存储图像数据
     # elif isinstance(the_path, str):
@@ -195,49 +191,14 @@ def process_images(
     resuly_list = []
     result_dict = {}
     image = None
-    for idx, (image_data) in enumerate(image_list, 1):
+    for idx, (image_data, source_path) in enumerate(image_list, 1):
 
         print(f"\n处理第 {idx}/{len(image_list)} 个图像...")
-
-        def get_points_from_csv(csv_path, target_location):
-            # 读取 CSV 文件
-            df = pd.read_csv(csv_path)
-
-            # 查找目标位置的行
-            target_row = df[df['点位'] == target_location]  # 假设列名是 '位置'
-
-            if not target_row.empty:
-                # 获取 '区域' 列的值（假设列名是 '区域'）
-                region_str = target_row['区域'].values[0]
-
-                # 将字符串转换为 Python 列表
-                points = ast.literal_eval(region_str)
-                return points
-            else:
-                print(f"未找到指定位置: {target_location}")
-                return None
-
-        print('点位名称：', monitor_point)
-        try:
-            if action_name == '遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全':
-                points = get_points_from_csv(XVANGUA_TICHU, monitor_point)
-                if points:
-                    image = apply_mosaic_on_polygon(cv2_img_list, points, 5)
-                else:
-                    image = image_data
-            else:
-                image = image_data
-        except Exception as e:
+        # 加载图像
+        if image_data is not None:
             image = image_data
-        # # 加载图像
-        if not isinstance(image_data, Image.Image):
-            # 如果不是 PIL 图像，记录错误并跳过该图像
-            print(f"图像不是有效的 PIL 图像对象")
-            return  # 跳过当前迭代，继续下一个图像
-
-        # 如果已经确认 image_data 是 PIL 图像，则直接使用
-        image = image_data
-
+        else:
+            image = Image.open(source_path)
 
         # 调用模型识别模块输入提示词进行图像的识别，返回识别结果output_text
 
@@ -298,24 +259,19 @@ def process_images(
     if all(x == 'yes' for x in resuly_list):
         # 第一帧图片有对应违法行为时，再次截取一帧
         print('第一帧图片有对应违法行为时，再次截取一帧,以进行验证')
-        frame2,dierzhang_time = capture_frame_from_camera(camera_id)
-        if frame2 != None:
-            output_text = pattern_recognition(question, frame2)
-            result_dict = safe_json_parse(output_text)
-            # 检查这一帧是否也是占掘路，若是就继续处理，若不是就退出
-            if result_dict["result"] == "no":
-                print('第二张图片没有占用挖掘公路行为，程序退出')
-
-                return '成功' ##退出
-            else:
-                print('第二张图片有占用挖掘公路行为，程序继续')
+        frame2 = capture_frame_from_camera(camera_id)
+        output_text = pattern_recognition(question, frame2)
+        result_dict = safe_json_parse(output_text)
+        # 检查这一帧是否也是占掘路，若是就继续处理，若不是就退出
+        if result_dict["result"] == "no":
+            print('第二张图片没有占用挖掘公路行为，程序退出')
+            return ##退出
         else:
-            print('获取不到第二张图片，使用第一张切片')
-        image = frame2
-        # current_time = datetime.now()
-        # future_time = current_time + timedelta(minutes=10, seconds=52)
+            print('第二张图片有占用挖掘公路行为，程序继续')
+        current_time = datetime.now()
+        future_time = current_time + timedelta(minutes=10, seconds=52)
         # 生成时间戳文件名
-        timestamp = dierzhang_time
+        timestamp = future_time.strftime("%Y%m%d_%H%M%S")
         filename = f"camera_{camera_id}_{timestamp}.jpg"
         output_path = os.path.join(output_folder, filename)
 
@@ -373,31 +329,45 @@ def process_images(
     print("\n处理完成。")
     print(f"共发现 {matched_count} 个符合检测条件的图像")
     print(f"结果保存路径：{os.path.abspath(output_folder)}")
-    return '成功'
-# def poll_cameras2(camera_list, question, output_folder):
-#     """
-#     轮询监控摄像头并处理图像。
-#
-#     参数：
-#         camera_list (list): 包含摄像头信息的列表，每个元素是一个字典，包含以下键：
-#             - "camera_id": 摄像头 ID。
-#             - "monitor_point": 监控点名称。
-#         question (str): 当前需要处理的问题类型（例如 "wajue_question"）。
-#         output_folder (str): 输出文件夹路径，用于保存处理后的图像。
-#     """
-#     print("\n占掘路识别...")
-#
-#     # for camera in camera_list:
-#     #
-#     #     camera_id = camera.get("camera_id")
-#     #     monitor_point = camera.get("monitor_point")
-#     #     if not camera_id or not monitor_point:
-#     #         print(f"跳过无效的摄像头配置: {camera}")
-#     #         continue
-#     #
-#     #     frame = process_violations(list(question.keys())[0], camera_id)
-#     #     if frame == None:
-#     #         print(f"{camera_id}点位没有图片")
-#     #         continue
-#         # 处理图像并保存到指定输出文件夹
-#     process_images(frame, question, output_folder=output_folder, monitor_point=monitor_point, camera_id=camera_id)
+
+def poll_cameras2(camera_list, question, output_folder):
+    """
+    轮询监控摄像头并处理图像。
+
+    参数：
+        camera_list (list): 包含摄像头信息的列表，每个元素是一个字典，包含以下键：
+            - "camera_id": 摄像头 ID。
+            - "monitor_point": 监控点名称。
+        question (str): 当前需要处理的问题类型（例如 "wajue_question"）。
+        output_folder (str): 输出文件夹路径，用于保存处理后的图像。
+    """
+    print("\n占掘路识别...")
+
+    for camera in camera_list:
+        camera_id = camera.get("camera_id")
+        monitor_point = camera.get("monitor_point")
+
+        if not camera_id or not monitor_point:
+            print(f"跳过无效的摄像头配置: {camera}")
+            continue
+
+        # 获取摄像头的一帧图像
+        import time
+
+        frames = []  # 用于保存捕获的帧
+
+
+        frame = capture_frame_from_camera(camera_id)
+        if frame is None:
+            print(f"捕获失败（摄像头 {camera_id}）")
+        else:
+            frames.append((frame,None))
+
+
+        print(f"共捕获 {len(frames)} 帧")
+        if not frames:  # 等价于 len(frames) == 0
+            print(f"网络问题，无法从摄像头 {camera_id} 获取图像")
+            continue
+
+        # 处理图像并保存到指定输出文件夹
+        process_images(frames, question, output_folder=output_folder, monitor_point=monitor_point, camera_id=camera_id)

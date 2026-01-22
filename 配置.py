@@ -21,7 +21,13 @@ CAMERA_DATA = "./data/《视频点位确认表》 0620.xlsx" # 摄像头点位�
 CAMERA_RESULT_DATA = "./data/result_with_camera_id.csv"# 整合数据后的摄像头点位信息，相对路径
 XVANGUA_TICHU = "./data/悬挂物剔除区域.csv"
 
-# 许可数据库配置
+# 图片文件夹信息数据库
+IMAGE_DB = '/app/qiepian/image_information.db'
+# 图片文件夹信息接口
+IMAGE_API= "http://10.212.160.162:18000"
+# 图片存储位置信息
+IMAGE_QIEPIAN_PATH = '/app/screenshots/'
+#  许可数据库配置
 XVKE_DB_CONFIG = {
     'host': '172.26.57.210',   # 数据库地址
     'port': 5236,          # 数据库端口，达梦默认5236
@@ -31,6 +37,8 @@ XVKE_DB_CONFIG = {
 # 模型服务
 MODEL_SERVE_URL = "http://htc-qwen2vl:8000/generate"  # qwen2vl服务地址
 
+# 重复预警推送间隔时间
+CHONGFU_TIME = 72
 # 摄像头列表
 # 示例数据
 

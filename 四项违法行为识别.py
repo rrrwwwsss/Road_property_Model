@@ -4,7 +4,7 @@ import sqlite3
 
 import pandas as pd
 
-from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
+from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes, jiance_imgtype
 from 整合数据 import get_data
 from 摄像头截帧 import capture_frame_from_camera
 from datetime import datetime, timedelta
@@ -16,7 +16,7 @@ from 给图像打马赛克 import apply_mosaic_on_polygon
 from 配置 import *
 import csv
 from 查询许可数据库 import job
-
+from 从数据库获取图片 import *
 def write_to_sqlite(data):
     conn = sqlite3.connect(TEMPORARY_RECORD)
     cursor = conn.cursor()
@@ -71,7 +71,7 @@ def write_to_csv(data):
     wupin_tanwei_pd["发生时间"] = pd.to_datetime(wupin_tanwei_pd["发生时间"], format="%Y%m%d_%H%M%S")
 
     # 计算 8 小时的时间差
-    time_diff = timedelta(hours=16)
+    time_diff = timedelta(hours=CHONGFU_TIME)
 
     # 筛选条件：发生地点、违法类型一致，且发生时间在 8 小时以内
     filtered_df = wupin_tanwei_pd[
@@ -146,6 +146,7 @@ def process_images(
         monitor_point,
         output_folder="output",
         camera_id="",
+        action_time = '未知',
         image_extensions=('.jpg', '.jpeg', '.png', '.bmp', '.webp')
 ):
     """
@@ -166,23 +167,23 @@ def process_images(
     os.makedirs(output_folder, exist_ok=True)
 
     # 处理输入类型
-    image_list = []
-    if isinstance(the_path, (Image.Image, np.ndarray)):
-        image_list.append((the_path, None))  # 仅存储图像数据
-    elif isinstance(the_path, str):
-        if os.path.isdir(the_path):
-            for f in os.listdir(the_path):
-                ext = os.path.splitext(f)[1].lower()
-                if ext in image_extensions:
-                    image_list.append((None, os.path.join(the_path, f)))
-        elif os.path.isfile(the_path):
-            ext = os.path.splitext(the_path)[1].lower()
-            if ext in image_extensions:
-                image_list.append((None, the_path))
-        else:
-            raise ValueError(f"路径不存在：{the_path}")
-    else:
-        raise TypeError("输入类型必须是路径或图像对象")
+    image_list = [the_path]
+    # if isinstance(the_path, (Image.Image, np.ndarray)):
+    #     image_list.append((the_path, None))  # 仅存储图像数据
+    # elif isinstance(the_path, str):
+    #     if os.path.isdir(the_path):
+    #         for f in os.listdir(the_path):
+    #             ext = os.path.splitext(f)[1].lower()
+    #             if ext in image_extensions:
+    #                 image_list.append((None, os.path.join(the_path, f)))
+    #     elif os.path.isfile(the_path):
+    #         ext = os.path.splitext(the_path)[1].lower()
+    #         if ext in image_extensions:
+    #             image_list.append((None, the_path))
+    #     else:
+    #         raise ValueError(f"路径不存在：{the_path}")
+    # else:
+    #     raise TypeError("输入类型必须是路径或图像对象")
 
     # 检查有效输入
     if not image_list:
@@ -193,7 +194,13 @@ def process_images(
 
     # 处理每个图像
     matched_count = 0
-    for idx, (image_data, source_path) in enumerate(image_list, 1):
+    for idx, (image_data) in enumerate(image_list, 1):
+        # # 加载图像
+        if not isinstance(image_data, Image.Image):
+            # 如果不是 PIL 图像，记录错误并跳过该图像
+            print(f"图像不是有效的 PIL 图像对象")
+            return  # 跳过当前迭代，继续下一个图像
+
         print(f"\n处理第 {idx}/{len(image_list)} 个图像...")
 
         def get_points_from_csv(csv_path, target_location):
@@ -287,10 +294,10 @@ def process_images(
 
         # 处理阳性结果
         if final_answer == "yes":
-            current_time = datetime.now()
-            future_time = current_time + timedelta(minutes=10, seconds=52)
+            # current_time = datetime.now()
+            # future_time = current_time + timedelta(minutes=10, seconds=52)
             # 生成时间戳文件名
-            timestamp = future_time.strftime("%Y%m%d_%H%M%S")
+            timestamp = action_time
             filename = f"camera_{camera_id}_{timestamp}.jpg"
             output_path = os.path.join(output_folder, filename)
 
@@ -349,32 +356,38 @@ def process_images(
     print("\n处理完成。")
     print(f"共发现 {matched_count} 个符合检测条件的图像")
     print(f"结果保存路径：{os.path.abspath(output_folder)}")
-def poll_cameras(camera_list, question, output_folder):
-    """
-    轮询监控摄像头并处理图像。
-
-    参数：
-        camera_list (list): 包含摄像头信息的列表，每个元素是一个字典，包含以下键：
-            - "camera_id": 摄像头 ID。
-            - "monitor_point": 监控点名称。
-        question (str): 当前需要处理的问题类型（例如 "wajue_question"）。
-        output_folder (str): 输出文件夹路径，用于保存处理后的图像。
-    """
-    print("\n工标、井盖、悬挂物识别...")
-
-    for camera in camera_list:
-        camera_id = camera.get("camera_id")
-        monitor_point = camera.get("monitor_point")
-
-        if not camera_id or not monitor_point:
-            print(f"跳过无效的摄像头配置: {camera}")
-            continue
-
-        # 获取摄像头的一帧图像
-        frame = capture_frame_from_camera(camera_id)
-        if frame is None:
-            print(f"网络问题，无法从摄像头 {camera_id} 获取图像")
-            continue
-
-        # 处理图像并保存到指定输出文件夹
-        process_images(frame, question, output_folder=output_folder, monitor_point=monitor_point, camera_id=camera_id)
+    return '成功'
+# def poll_cameras(camera_list, question, output_folder):
+#     """
+#     轮询监控摄像头并处理图像。
+#
+#     参数：
+#         camera_list (list): 包含摄像头信息的列表，每个元素是一个字典，包含以下键：
+#             - "camera_id": 摄像头 ID。
+#             - "monitor_point": 监控点名称。
+#         question (str): 当前需要处理的问题类型（例如 "wajue_question"）。
+#         output_folder (str): 输出文件夹路径，用于保存处理后的图像。
+#     """
+#     print("\n工标、井盖、悬挂物识别...")
+#
+#     for camera in camera_list:
+#
+#         camera_id = camera.get("camera_id")
+#         monitor_point = camera.get("monitor_point")
+#         if not camera_id or not monitor_point:
+#             print(f"跳过无效的摄像头配置: {camera}")
+#             continue
+#
+#
+#         frame = process_violations(list(question.keys())[0], camera_id)
+#         if frame == None:
+#             print(f"{camera_id}点位没有图片")
+#             continue
+#         # # 获取摄像头的一帧图像
+#         # frame = capture_frame_from_camera(camera_id)
+#         # if frame is None:
+#         #     print(f"网络问题，无法从摄像头 {camera_id} 获取图像")
+#         #     continue
+#
+#         # 处理图像并保存到指定输出文件夹
+#         process_images(frame, question, output_folder=output_folder, monitor_point=monitor_point, camera_id=camera_id)

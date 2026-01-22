@@ -20,20 +20,20 @@ def close_video(invite_id):
     url = f"{BASE_URL}/closeVideo.action"
 
 
-    params = {
-        # "inviteId": invite_id,
-        "playType": 1
-    }
-    requests.get(url, params=params, verify=False)
-    print("录像回放已关闭")
-
-
-    params = {
-        # "inviteId": invite_id,
-        "playType": 0
-    }
-    requests.get(url, params=params, verify=False)
-    print("实时视频已关闭")
+    # params = {
+    #     # "inviteId": invite_id,
+    #     "playType": 1
+    # }
+    # requests.get(url, params=params, verify=False)
+    # print("录像回放已关闭")
+    #
+    #
+    # params = {
+    #     # "inviteId": invite_id,
+    #     "playType": 0
+    # }
+    # requests.get(url, params=params, verify=False)
+    # print("实时视频已关闭")
 
 
     params = {
@@ -84,7 +84,7 @@ def capture_frame_from_camera(camera_id):
             "streamType": "0",
             "cameraId": camera_id
         }
-        response = requests.get(url, params=params, verify=False)
+        response = requests.get(url, params=params, verify=False, timeout=10)
         if response.status_code == 200:
             try:
                 data = response.json()
@@ -114,12 +114,26 @@ def capture_frame_from_camera(camera_id):
             if not cap.isOpened():
                 print("无法打开视频流，请检查URL是否正确。")
                 return None
-            # 如果当前缓冲区里的帧坏了，FFmpeg 会继续丢掉坏数据，直到遇到一个完整的 I 帧（关键帧）才能解码出图像。
-            # 所以你虽然在解码过程中报了一堆“坏帧”错误，但最后还是等到一个关键帧 → 返回 ret=True，frame 里有图像数据。
-            ret, frame = cap.read()
-            if not ret:
-                print("无法读取视频流帧，请检查网络或视频流是否可用。")
-                return None
+
+            # # 如果当前缓冲区里的帧坏了，FFmpeg 会继续丢掉坏数据，直到遇到一个完整的 I 帧（关键帧）才能解码出图像。
+            # # 所以你虽然在解码过程中报了一堆“坏帧”错误，但最后还是等到一个关键帧 → 返回 ret=True，frame 里有图像数据。
+            # ret, frame = cap.read()
+            # if not ret:
+            #     print("无法读取视频流帧，请检查网络或视频流是否可用。")
+            #     return None
+
+            frame = None
+            # 优化：丢弃前几帧，防止花屏/绿屏/黑屏
+            # RTSP 流通常需要几帧来初始化解码缓冲区
+            drop_frames = 5
+            for i in range(drop_frames):
+                ret, temp_frame = cap.read()
+                if not ret:
+                    print(f"读取第 {i + 1} 帧失败，流可能已断开")
+                    break
+                # 只有最后一次循环才保留 frame
+                if i == drop_frames - 1:
+                    frame = temp_frame
 
             print("成功截取一帧。")
             cap.release()  # 释放视频流资源
@@ -127,13 +141,14 @@ def capture_frame_from_camera(camera_id):
             print("未获取到视频流URL，跳过截帧操作。")
             return None
 
-        # 第三步：关闭视频流
-        if invite_id:
-            close_video(invite_id)
 
+        # if invite_id:
+        #     close_video(invite_id)
+
+        # 第三步：保存图片
         # 返回截取的帧
         pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-        current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # 定义文件名和完整路径
         file_name = f"camera_{camera_id}_{current_time}.jpg"
@@ -145,7 +160,7 @@ def capture_frame_from_camera(camera_id):
         last_part = os.path.basename(YUANTU_PATH)
         output_path = os.path.join(LINUX_PIC_PAT + last_part, file_name)
         print("保存图片linux路径：", output_path)
-        return pil_image
+        return pil_image,current_time
 
     except requests.exceptions.SSLError as ssl_err:
         print(f"SSL验证错误: {ssl_err}")

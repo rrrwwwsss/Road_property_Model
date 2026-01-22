@@ -41,11 +41,11 @@ def tuisong(csv_file_path):
 #     logger.info("推送数据库并清理csv完成", flush=True)
 def tuisong_main(queue):
 
-    pid = os.getpid()
-    logger = Logger(name=f"子进程-{pid}").get_logger()
-    # 将日志发送到队列
-    queue_handler = QueueHandler(queue)
-    logger.addHandler(queue_handler)
+    # pid = os.getpid()
+    # logger = Logger(name=f"子进程-{pid}").get_logger()
+    # # 将日志发送到队列
+    # queue_handler = QueueHandler(queue)
+    # logger.addHandler(queue_handler)
     # # 每天 1 点执行一次
     # schedule.every().day.at("02:00").do(job)
     #
