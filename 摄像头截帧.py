@@ -84,7 +84,7 @@ def capture_frame_from_camera(camera_id):
             "streamType": "0",
             "cameraId": camera_id
         }
-        response = requests.get(url, params=params, verify=False, timeout=10)
+        response = requests.get(url, params=params, verify=False)
         if response.status_code == 200:
             try:
                 data = response.json()
@@ -125,7 +125,7 @@ def capture_frame_from_camera(camera_id):
             frame = None
             # 优化：丢弃前几帧，防止花屏/绿屏/黑屏
             # RTSP 流通常需要几帧来初始化解码缓冲区
-            drop_frames = 5
+            drop_frames = 10
             for i in range(drop_frames):
                 ret, temp_frame = cap.read()
                 if not ret:
@@ -148,7 +148,7 @@ def capture_frame_from_camera(camera_id):
         # 第三步：保存图片
         # 返回截取的帧
         pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+        current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         # 定义文件名和完整路径
         file_name = f"camera_{camera_id}_{current_time}.jpg"
@@ -160,7 +160,7 @@ def capture_frame_from_camera(camera_id):
         last_part = os.path.basename(YUANTU_PATH)
         output_path = os.path.join(LINUX_PIC_PAT + last_part, file_name)
         print("保存图片linux路径：", output_path)
-        return pil_image,current_time
+        return pil_image
 
     except requests.exceptions.SSLError as ssl_err:
         print(f"SSL验证错误: {ssl_err}")

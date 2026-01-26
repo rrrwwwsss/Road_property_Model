@@ -298,24 +298,29 @@ def process_images(
     if all(x == 'yes' for x in resuly_list):
         # 第一帧图片有对应违法行为时，再次截取一帧
         print('第一帧图片有对应违法行为时，再次截取一帧,以进行验证')
-        frame2,dierzhang_time = capture_frame_from_camera(camera_id)
-        if frame2 != None:
-            output_text = pattern_recognition(question, frame2)
-            result_dict = safe_json_parse(output_text)
-            # 检查这一帧是否也是占掘路，若是就继续处理，若不是就退出
-            if result_dict["result"] == "no":
-                print('第二张图片没有占用挖掘公路行为，程序退出')
+        try:
+            frame2,timestamp = capture_frame_from_camera(camera_id)
+            if frame2 != None:
+                output_text = pattern_recognition(question, frame2)
+                result_dict = safe_json_parse(output_text)
+                # 检查这一帧是否也是占掘路，若是就继续处理，若不是就退出
+                if result_dict["result"] == "no":
+                    print('第二张图片没有占用挖掘公路行为，程序退出')
 
-                return '成功' ##退出
+                    return '成功' ##退出
+                else:
+                    print('第二张图片有占用挖掘公路行为，程序继续')
             else:
-                print('第二张图片有占用挖掘公路行为，程序继续')
-        else:
-            print('获取不到第二张图片，使用第一张切片')
-        image = frame2
+                print('获取不到第二张图片，使用第一张切片')
+            image = frame2
+        except Exception as e:
+            print(f"处理第二张图片时出错：{e},使用第一张切片")
+            image = frame1
+            timestamp = action_time
         # current_time = datetime.now()
         # future_time = current_time + timedelta(minutes=10, seconds=52)
         # 生成时间戳文件名
-        timestamp = dierzhang_time
+
         filename = f"camera_{camera_id}_{timestamp}.jpg"
         output_path = os.path.join(output_folder, filename)
 

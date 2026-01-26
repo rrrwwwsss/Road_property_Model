@@ -11,8 +11,7 @@ IMAGE_DIRS = [
     GONGBIAO_PATH ,
     WAJUE_PATH,
     JINGGAI_PATH,
-    XVANGUA_PATH,
-    DUOZHEN_PATH
+    XVANGUA_PATH
 ]
 
 # 路由：访问根路径时列出所有图片及其链接

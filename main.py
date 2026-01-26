@@ -93,10 +93,37 @@ If related to transportation or official business, reply:
 # Output format: If illegal items are detected hanging above the road or within the road area, please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 image size. Otherwise, please return: {"result": "no"}.
 # """
 xuangua_question = """
-Role: You are an intelligent assistant. Your task is to detect any behaviors that may endanger road safety, such as installing pipes or hanging items on road infrastructure, and return the location of such items in the image.
-Task: Analyze the image and determine if there are any illegal items hanging above the road, such as ropes, decorations, or other non-road infrastructure items.
-Please ignore the following: 1. Pedestrians, vehicles (including parked vehicles), and legal road facilities (such as traffic signals, traffic signs, street lamp posts, surveillance cameras, traffic guidance equipment, cables, wires, etc.) 2. Ignore items hanging on roadside buildings. 3. Ignore roadside branches, leaves, and other debris. 4. Ignore some minor hanging objects, such as a small piece of rope hanging from a bridge (if it does not endanger road safety)
-Note: If there are words on the item, extract the text content and analyze its nature. If it is related to traffic, public slogans, or place names, ignore it. If the image is blurry, or due to rain, fog, or lighting reasons, the view is obstructed, and it is impossible to clearly see the image, reply "no" to avoid making a wrong judgment.
+
+# Role
+您是一位道路安全AI检测员，请分析图像，识别并定位位于行车道正上方且可能危及交通安全的非法悬挂物。
+
+# Detection Target (Positive Class)
+请寻找悬挂在道路上方空间的异常物品，包括但不限于：
+1. 私人悬挂物（如横幅、私人装饰、灯笼、衣物等）。
+2. 非交通用途的掉落悬挂物或未固定的建筑材料。
+*注意：仅关注物理位置处于道路上方（Overhead）且可能造成掉落风险或视线遮挡的物体。*
+
+# Exclusion Criteria (Negative Class) - 必须严格忽略
+1. 合法交通设施：交通信号灯、标志牌、龙门架、路灯、监控摄像头、官方电缆/电线、交通诱导屏。
+2. 背景物体：仅附着在路边建筑物墙面上的物体（未延伸至道路上方）、路边的树木（包括伸出的树枝和树叶）、路面杂物。
+3. 合法基建：桥梁附属的排水管、紧贴桥梁结构的固定管道（除非管道呈断裂或异常悬垂状态）。
+4. 无关细节：光斑、阴影、雨雾干扰、对交通安全无威胁的细微物体（如桥梁垂下的一小段无害绳头）。
+5. 移动目标：行人、车辆（含停放车辆）。
+
+# Text Analysis Logic
+如果检测对象包含文字，执行OCR分析：
+- 若内容为交通指令、地名、公共标语或官方公告 -> 忽略（视为合法设施）。
+- 若内容为商业广告、私人信息或无法识别的非官方文本 -> 保留（视为非法悬挂物）。
+
+# Quality Control
+如果图像因模糊、过暗、过曝或恶劣天气（雨/雾）导致无法做出可靠判断，必须直接返回 {"result": "no"}。
+
+# Output Format
+- 如果检测到目标：
+  {"result": "yes", "bounding_boxes": [[xmin, ymin, xmax, ymax], ...], "xvanguawu": "物品名称"}
+  *注：坐标需归一化并映射到 1000x1000 像素参考系。*
+- 如果未检测到目标或图像质量差：
+  {"result": "no"}
 """
 # 堆放物品
 # wupin_question = """
@@ -149,7 +176,7 @@ Note: If a vehicle is identified, please return "no". If you are unsure whether 
 # """
 baitan_question = """
 Role: You are an artificial intelligence assistant capable of identifying illegal stall setups or temporary street vendors' activities on roads or within road usage areas.
-Task: Please analyze the image to determine if there are any obvious signs of roadside selling, mobile stalls, or temporary booths occupying roads or sidewalks. These activities must include the set-up of stalls and the presence of vendors, and both must be present simultaneously to be recognized!
+Task: Please analyze the image to determine if there are any obvious signs of roadside selling, mobile stalls, or temporary booths occupying roads or sidewalks. These activities must include the set-up of stalls and the presence of vendors, and both must be present simultaneously to be recognized!Please ignore the goods on the vehicles that are moving normally!
 Note: If you are unsure whether this behavior constitutes a set-up stall, please return 'no' to avoid incorrect judgment. If the behavior does not occur in the road area, also return 'no'.
 """
 
