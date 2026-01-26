@@ -57,7 +57,15 @@ The focus is on identifying *ongoing occupation or excavation activities*, not m
 
 # 井盖缺失
 jinggai_question = """
-You are an intelligent assistant capable of accurately identifying instances of missing or removed manhole covers on roads or within the road land area in images. Your task is to detect whether there is a manhole cover absence incident and return the coordinate range of the missing position in the image. Please analyze the image and determine whether there is a situation where the manhole cover has been removed, exposing the manhole opening. Focus on the locations on the road surface where the manhole cover should be but is now clearly missing (such as circular or square voids). Ignore the manhole covers that are already properly covered, pedestrians, vehicles (including parked vehicles). 
+Role: You are an intelligent assistant capable of accurately identifying instances of missing or removed manhole covers on roads or within road land areas in images.
+
+Task: Analyze the image to precisely identify and locate abnormal situations of **missing manhole covers (exposed shafts)** on the road surface or curb areas.
+- Please identify and mark manhole openings that should be covered but are currently exposed. Features include:
+1. Distinct circular, rectangular, or square dark voids (traps).
+2. Manhole covers that are displaced, flipped, or partially collapsed, resulting in the shaft being partially or fully exposed.
+3. The opening is usually accompanied by a clear edge contour, with the interior appearing as deep shadow or standing water.
+
+Note: If the lighting is extremely dark, the image is severely blurred, or reflections from accumulated water make it impossible to determine the presence of a hole with certainty, you must return {"result": "no"} to avoid false positives.
 """
 # 设置非公路标志
 # gongbiao_question = """
@@ -101,14 +109,19 @@ xuangua_question = """
 请寻找悬挂在道路上方空间的异常物品，包括但不限于：
 1. 私人悬挂物（如横幅、私人装饰、灯笼、衣物等）。
 2. 非交通用途的掉落悬挂物或未固定的建筑材料。
-*注意：仅关注物理位置处于道路上方（Overhead）且可能造成掉落风险或视线遮挡的物体。*
+*注意：仅关注物理位置处于道路上方（Overhead）且可能造成掉落风险或视线遮挡的物体。注意：如果是那种道路上面有桥的要忽略桥上正常行驶的车辆以及桥上正常的横幅*
 
-# Exclusion Criteria (Negative Class) - 必须严格忽略
+# Exclusion Criteria (Negative Class) - *必须严格忽略*
 1. 合法交通设施：交通信号灯、标志牌、龙门架、路灯、监控摄像头、官方电缆/电线、交通诱导屏。
 2. 背景物体：仅附着在路边建筑物墙面上的物体（未延伸至道路上方）、路边的树木（包括伸出的树枝和树叶）、路面杂物。
 3. 合法基建：桥梁附属的排水管、紧贴桥梁结构的固定管道（除非管道呈断裂或异常悬垂状态）。
 4. 无关细节：光斑、阴影、雨雾干扰、对交通安全无威胁的细微物体（如桥梁垂下的一小段无害绳头）。
 5. 移动目标：行人、车辆（含停放车辆）。
+6. 桥梁相关正常现象：
+   - **在立交桥/桥梁上正常行驶的车辆。**
+   - **固定在桥梁护栏或结构上的官方标语、宣传横幅。**
+7. **图像人工处理痕迹：**
+   - **纯黑色的方框、遮盖块、人工涂抹区域或后期处理的标注框。**
 
 # Text Analysis Logic
 如果检测对象包含文字，执行OCR分析：
@@ -125,6 +138,7 @@ xuangua_question = """
 - 如果未检测到目标或图像质量差：
   {"result": "no"}
 """
+#
 # 堆放物品
 # wupin_question = """
 # Role: You are an intelligent assistant capable of accurately identifying the act of stacking items on the roads or within the road land area in an image. Your task is to detect whether there are any illegal stacking or placement of items, and return the positions of these items in the image.
@@ -257,7 +271,7 @@ def run_loop():
             try:
                 # xuangua_list = updata_dianList("遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全")
                 print("开始轮询利用设施悬挂物", flush=True)
-                chuli({'遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全': xuangua_question + model_result}, XVANGUA_PATH)
+                chuli({'遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全': xuangua_question }, XVANGUA_PATH)
             except Exception as e:
                 print(f"[异常] 利用附属设施悬挂物品：{e}", flush=True)
                 traceback.print_exc()

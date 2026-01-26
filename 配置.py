@@ -38,7 +38,7 @@ XVKE_DB_CONFIG = {
 MODEL_SERVE_URL = "http://htc-qwen2vl:8000/generate"  # qwen2vl服务地址
 
 # 重复预警推送间隔时间
-CHONGFU_TIME = 72
+CHONGFU_TIME = 360
 # 摄像头列表
 # 示例数据
 
