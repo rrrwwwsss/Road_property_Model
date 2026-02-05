@@ -16,12 +16,14 @@ import csv
 from 从数据库获取图片 import *
 from 查询许可数据库 import job
 def write_to_sqlite(data):
+    sqlite_data = data.copy()  # 👈 关键修改在这里！
+    sqlite_data.pop('other_data', None)
     conn = sqlite3.connect(TEMPORARY_RECORD)
     cursor = conn.cursor()
 
-    placeholders = ', '.join(['?'] * len(data))
-    keys = ', '.join(data.keys())
-    values = list(data.values())
+    placeholders = ', '.join(['?'] * len(sqlite_data))
+    keys = ', '.join(sqlite_data.keys())
+    values = list(sqlite_data.values())
     # 把传入数据库的值转化为安全的字符串
     def safe_sql_value(v):
         import numpy as np
@@ -126,8 +128,7 @@ def write_to_csv(data):
         # except FileExistsError:
         #     pass  # 如果文件已存在，则跳过表头写入
         # 往太极传数据
-        print("开始往太极传数据")
-        get_data(data)
+
         print("写入数据到本地")
         # # 追加写入数据
         # with open(file_path, mode='a', newline='', encoding='utf-8') as csvfile:  # 'a' 模式追加写入
@@ -135,8 +136,11 @@ def write_to_csv(data):
         #     writer.writerow(data)  # 写入一行数据，data是字典
         # 写入临时数据库
         write_to_sqlite(data)
+        print("开始往太极传数据")
+        get_data(data)
     else:
-        return str(CHONGFU_TIME)+"小时内已上传过该行为"
+        print(str(CHONGFU_TIME)+"小时内已上传过该行为")
+        return None
 def process_images(
         cv2_img_list,
         action,
@@ -144,6 +148,7 @@ def process_images(
         output_folder="output",
         camera_id="",
         action_time='未知',
+        other_data = None,
         image_extensions=('.jpg', '.jpeg', '.png', '.bmp', '.webp')
 ):
     """
@@ -299,7 +304,7 @@ def process_images(
         # 第一帧图片有对应违法行为时，再次截取一帧
         print('第一帧图片有对应违法行为时，再次截取一帧,以进行验证')
         try:
-            frame2,timestamp = capture_frame_from_camera(camera_id)
+            frame2, timestamp = capture_frame_from_camera(camera_id) or (None, None)
             if frame2 != None:
                 output_text = pattern_recognition(question, frame2)
                 result_dict = safe_json_parse(output_text)
@@ -310,12 +315,15 @@ def process_images(
                     return '成功' ##退出
                 else:
                     print('第二张图片有占用挖掘公路行为，程序继续')
+                    image = frame2
+
             else:
                 print('获取不到第二张图片，使用第一张切片')
-            image = frame2
+                timestamp = action_time
+
         except Exception as e:
             print(f"处理第二张图片时出错：{e},使用第一张切片")
-            image = frame1
+            # image = image_data
             timestamp = action_time
         # current_time = datetime.now()
         # future_time = current_time + timedelta(minutes=10, seconds=52)
@@ -373,6 +381,7 @@ def process_images(
             "处理人": "执法员",
             "path": output_path,
             "处理备注": "无备注",
+            'other_data': other_data,
         }
         write_to_csv(data)
     print("\n处理完成。")

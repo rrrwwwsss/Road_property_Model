@@ -1,9 +1,12 @@
 # 服务器相关配置
 BASE_URL = "https://10.212.160.158:8101/nvms8100/apploginVideo" #监控摄像头地址
-USER_NAME = "bjjzdx"
-USER_PWD = "ZFZDwxglwf@2025"
+# USER_NAME = "bjjzdx"
+# USER_PWD = "ZFZDwxglwf@2025"
+USER_NAME = "bhwfxm05"
+USER_PWD = "c6QKJrTtuT"
 # 联通服务器72b模型接口
 LIANTONG_MODEL = "http://192.168.0.161:1025/v1/chat/completions"
+# LIANTONG_MODEL = "http://192.168.0.92:3025/v1/chat/completions"
 # 数据存储相关配置
 LINUX_PIC_PAT = "/data1/qwen2v/pic/" # linux里数据存储基础路径
 DATA_BASE_PATH = "/app/pic" # 容器里数据存储基础路径
@@ -39,6 +42,7 @@ MODEL_SERVE_URL = "http://htc-qwen2vl:8000/generate"  # qwen2vl服务地址
 
 # 重复预警推送间隔时间
 CHONGFU_TIME = 360
+# CHONGFU_TIME = 360
 # 摄像头列表
 # 示例数据
 

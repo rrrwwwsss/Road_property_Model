@@ -15,6 +15,7 @@ def detect_frame(question, image_base64):
     image_data_url = f"data:image/png;base64,{image_base64}"  # 注意前缀
     data = {
         "model": "qwen2_5_vl",  # 使用的模型名称，这里是 Qwen2.5-VL (多模态，支持图文输入)
+        # "model": "qwenvl",
         "messages": [  # 对话历史，采用 Chat 格式
             {
                 "role": "user",  # 角色，这里是用户

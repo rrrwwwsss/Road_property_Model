@@ -18,12 +18,14 @@ import csv
 from 查询许可数据库 import job
 from 从数据库获取图片 import *
 def write_to_sqlite(data):
+    sqlite_data = data.copy()  # 👈 关键修改在这里！
+    sqlite_data.pop('other_data', None)
     conn = sqlite3.connect(TEMPORARY_RECORD)
     cursor = conn.cursor()
 
-    placeholders = ', '.join(['?'] * len(data))
-    keys = ', '.join(data.keys())
-    values = list(data.values())
+    placeholders = ', '.join(['?'] * len(sqlite_data))
+    keys = ', '.join(sqlite_data.keys())
+    values = list(sqlite_data.values())
     # 把传入数据库的值转化为安全的字符串
     def safe_sql_value(v):
         import numpy as np
@@ -129,8 +131,7 @@ def write_to_csv(data):
         # except FileExistsError:
         #     pass  # 如果文件已存在，则跳过表头写入
         # 往太极传数据
-        print("开始往太极传数据")
-        get_data(data)
+
         print("写入数据到本地")
         # # 追加写入数据
         # with open(file_path, mode='a', newline='', encoding='utf-8') as csvfile:  # 'a' 模式追加写入
@@ -138,6 +139,8 @@ def write_to_csv(data):
         #     writer.writerow(data)  # 写入一行数据，data是字典
         # 写入临时数据库
         write_to_sqlite(data)
+        print("开始往太极传数据")
+        get_data(data)
     else:
         return "8小时内已上传过该行为"
 def process_images(
@@ -147,6 +150,7 @@ def process_images(
         output_folder="output",
         camera_id="",
         action_time = '未知',
+        other_data = None,
         image_extensions=('.jpg', '.jpeg', '.png', '.bmp', '.webp')
 ):
     """
@@ -160,6 +164,8 @@ def process_images(
         image_extensions: 支持的图片格式扩展名
         camera_id : 摄像头id
     """
+    if other_data is None:
+        other_data = []
     action_name = list(action.keys())[0]
     # question: 自定义检测问题描述
     question = action[action_name]
@@ -351,6 +357,7 @@ def process_images(
                 "处理人": "执法员",
                 "path": output_path,
                 "处理备注": "无备注",
+                'other_data': other_data,
             }
             write_to_csv(data)
     print("\n处理完成。")

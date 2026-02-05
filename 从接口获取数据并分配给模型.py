@@ -106,6 +106,9 @@ def chuli(question, output_folder):
         # 3. 修复参数传递，通常需要键值对
         print(f"\n📤 正在获取{violation_type}行为数据库列表")
         response = fetch_images_by_violation(violation_type,url)
+        if response == None:
+            print(f"{violation_type}列表里没有数据，程序退出")
+            return None
         print(f'获取了{len(response)}条数据')
         # 4. 统一的循环处理逻辑
 
@@ -114,7 +117,7 @@ def chuli(question, output_folder):
         # 1. 安全检查：确保 response 是列表且不为空
         if response and isinstance(response, list):
 
-            # --- 数据过滤逻辑开始 ---
+
             if len(response) > 200:
                 print(f"检测到数据量为 {len(response)}，触发去重策略：每个地点仅保留最新的一条。")
 
@@ -139,7 +142,7 @@ def chuli(question, output_folder):
         for data in response:
             index += 1
             image_name = data.get("name")
-            print(f'{violation_type}正在处理第{index}条数据，图片名称{image_name},共{total_count}条')
+            print(f'📤{violation_type}正在处理第{index}条数据，图片名称{image_name},共{total_count}条')
             try:
                 path = f"{IMAGE_QIEPIAN_PATH}{image_name}"
 
@@ -152,7 +155,8 @@ def chuli(question, output_folder):
                     output_folder=output_folder,
                     monitor_point=data.get('location'),
                     camera_id=data.get('camera_id'),
-                    action_time = data.get('capture_time')
+                    action_time = data.get('capture_time'),
+                    other_data = data
                 )
 
                 feedback_data = [image_name]

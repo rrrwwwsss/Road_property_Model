@@ -17,9 +17,9 @@ def get_data(model_data):
     #             }
     # 获取辖区编码
     print(model_data)
-    df = get_dianwei_data()
+    # df = get_dianwei_data()
     target = model_data['发生地点']
-    unit_code = df[df['具备视频分析条件的点位'] == target]['辖区编码'].iloc[0]
+    unit_code = model_data['other_data']['area_number']
     print("辖区编码:",unit_code)
     try:
         unit_code = str(int(float(unit_code)))
@@ -66,3 +66,11 @@ def get_data(model_data):
         writer.writerow(data)
 
     print('传入提交数据库模块数据:',data)
+    allowed_violations = [
+        '遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全',
+        '在公路范围内擅自移动井盖',
+        '在公路用地范围内设置公路标志以外的其他标志'
+    ]
+
+    if model_data['违法类型'] not in allowed_violations:
+        insert_database(data)

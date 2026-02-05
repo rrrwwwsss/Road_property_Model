@@ -52,12 +52,14 @@ def all_boxes_match(current_boxes, previous_boxes, iou_threshold=0.9):
             return False
     return True
 def write_to_sqlite(data):
+    sqlite_data = data.copy()  # 👈 关键修改在这里！
+    sqlite_data.pop('other_data', None)
     conn = sqlite3.connect(TEMPORARY_RECORD)
     cursor = conn.cursor()
 
-    placeholders = ', '.join(['?'] * len(data))
-    keys = ', '.join(data.keys())
-    values = list(data.values())
+    placeholders = ', '.join(['?'] * len(sqlite_data))
+    keys = ', '.join(sqlite_data.keys())
+    values = list(sqlite_data.values())
     # 把传入数据库的值转化为安全的字符串
     def safe_sql_value(v):
         import numpy as np
@@ -75,6 +77,7 @@ def write_to_sqlite(data):
     conn.commit()
     conn.close()
 def write_to_csv(data):
+
     # 创建SQLite数据库,存储临时监测数据
     conn = sqlite3.connect(TEMPORARY_RECORD)
     cursor = conn.cursor()
@@ -212,6 +215,7 @@ def process_images(
         camera_id,
         output_folder="output",
         action_time = '未知',
+        other_data = None,
         image_extensions=('.jpg', '.jpeg', '.png', '.bmp', '.webp'),
 ):
     """
@@ -346,7 +350,8 @@ def process_images(
                 "处理人": "执法员",
                 "path": output_path,
                 "处理备注": "无备注",
-                "框位置": normalized_boxes
+                "框位置": normalized_boxes,
+                'other_data': other_data,
             }
             print(write_to_csv(data))
     print("\n处理完成。")

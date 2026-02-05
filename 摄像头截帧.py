@@ -95,7 +95,7 @@ def capture_frame_from_camera(camera_id):
                     print(f"视频流URL: {video_stream_url}")
                     print(f"播放句柄: {invite_id}")
                 else:
-                    print(f"操作失败！错误代码: {data.get('code', '未知')}, 错误信息: {data.get('message', '无消息')}")
+                    print(f"{camera_id}操作失败！错误代码: {data.get('code', '未知')}, 错误信息: {data.get('message', '无消息')}")
                     return None
             except ValueError:
                 print("返回的内容不是有效的JSON格式：")
@@ -125,15 +125,13 @@ def capture_frame_from_camera(camera_id):
             frame = None
             # 优化：丢弃前几帧，防止花屏/绿屏/黑屏
             # RTSP 流通常需要几帧来初始化解码缓冲区
-            drop_frames = 10
+            drop_frames = 5
             for i in range(drop_frames):
                 ret, temp_frame = cap.read()
-                if not ret:
-                    print(f"读取第 {i + 1} 帧失败，流可能已断开")
-                    break
-                # 只有最后一次循环才保留 frame
-                if i == drop_frames - 1:
-                    frame = temp_frame
+                if ret:
+                    frame = temp_frame  # 保留最新有效的帧
+                else:
+                    print(f"警告：第 {i + 1} 帧读取失败")
 
             print("成功截取一帧。")
             cap.release()  # 释放视频流资源
@@ -147,8 +145,12 @@ def capture_frame_from_camera(camera_id):
 
         # 第三步：保存图片
         # 返回截取的帧
+        # 关键：检查 frame 是否成功获取
+        if frame is None:
+            print("未能成功截取有效帧，frame 为 None")
+            return None  # 或抛出异常、记录日志等
         pil_image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-        current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
 
         # 定义文件名和完整路径
         file_name = f"camera_{camera_id}_{current_time}.jpg"
@@ -160,7 +162,7 @@ def capture_frame_from_camera(camera_id):
         last_part = os.path.basename(YUANTU_PATH)
         output_path = os.path.join(LINUX_PIC_PAT + last_part, file_name)
         print("保存图片linux路径：", output_path)
-        return pil_image
+        return pil_image,current_time
 
     except requests.exceptions.SSLError as ssl_err:
         print(f"SSL验证错误: {ssl_err}")

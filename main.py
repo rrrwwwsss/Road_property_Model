@@ -107,7 +107,7 @@ xuangua_question = """
 
 # Detection Target (Positive Class)
 请寻找悬挂在道路上方空间的异常物品，包括但不限于：
-1. 私人悬挂物（如横幅、私人装饰、灯笼、衣物等）。
+1. 私人悬挂物（如横幅、私人装饰、衣物等）。
 2. 非交通用途的掉落悬挂物或未固定的建筑材料。
 *注意：仅关注物理位置处于道路上方（Overhead）且可能造成掉落风险或视线遮挡的物体。注意：如果是那种道路上面有桥的要忽略桥上正常行驶的车辆以及桥上正常的横幅*
 
@@ -122,6 +122,7 @@ xuangua_question = """
    - **固定在桥梁护栏或结构上的官方标语、宣传横幅。**
 7. **图像人工处理痕迹：**
    - **纯黑色的方框、遮盖块、人工涂抹区域或后期处理的标注框。**
+8. **灯笼：根据项目要求，所有灯笼均视为合法或忽略项。**
 
 # Text Analysis Logic
 如果检测对象包含文字，执行OCR分析：
@@ -239,8 +240,9 @@ def run_loop():
             except Exception as e:
                 print(f"[异常] 擅自占用、挖掘公路：{e}", flush=True)
                 traceback.print_exc()
-            time.sleep(60)
             print("占掘路点位已轮询一遍")
+            time.sleep(60)
+
 
 
 
@@ -253,9 +255,10 @@ def run_loop():
             except Exception as e:
                 print(f"[异常] 堆放物品：{e}", flush=True)
                 traceback.print_exc()
+            print("堆放物品点位已轮询一遍")
             time.sleep(60)
 
-            print("堆放物品点位已轮询一遍")
+
 
             try:
                 # baitan_list = updata_dianList("在公路上及公路用地范围内摆摊设点")
@@ -264,8 +267,9 @@ def run_loop():
             except Exception as e:
                 print(f"[异常] 摆设摊位：{e}", flush=True)
                 traceback.print_exc()
-            time.sleep(60)
             print("摆设摊位点位已轮询一遍")
+            time.sleep(60)
+
     def dipin():
         while True:
             try:
@@ -275,8 +279,9 @@ def run_loop():
             except Exception as e:
                 print(f"[异常] 利用附属设施悬挂物品：{e}", flush=True)
                 traceback.print_exc()
-            time.sleep(60)
             print("悬挂物点位已轮询一遍")
+            time.sleep(60)
+
 
             try:
                 # jinggai_list = updata_dianList("在公路范围内擅自移动井盖")
@@ -285,8 +290,9 @@ def run_loop():
             except Exception as e:
                 print(f"[异常] 井盖移动或缺失：{e}", flush=True)
                 traceback.print_exc()
-            time.sleep(60)
             print("井盖缺失点位已轮询一遍")
+            time.sleep(60)
+
 
             try:
                 # gongbiao_list = updata_dianList("在公路用地范围内设置公路标志以外的其他标志")
@@ -295,8 +301,9 @@ def run_loop():
             except Exception as e:
                 print(f"[异常] 设置非公路标志：{e}", flush=True)
                 traceback.print_exc()
-            time.sleep(60)
             print("非公路标志点位已轮询一遍")
+            time.sleep(60)
+
 
 
         # === 关键：使用 threading.Thread 并设置为守护线程 ===
