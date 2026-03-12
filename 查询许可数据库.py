@@ -25,6 +25,7 @@ def dameng_connection(business_name):
         # result = cursor.fetchone()
         # print(f"数据库版本：{result[0]}")
         # 执行查询语句
+        
         query = """
         SELECT DECISIONINFORMATION FROM GXJTW.ADMINISTRATIVE_LICENSE_APPLICATION
         WHERE BUSINESS_NAME = ?

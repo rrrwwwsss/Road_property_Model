@@ -26,7 +26,7 @@ def detect_frame(question, image_base64):
                 ]
             }
         ],
-        "max_tokens": 512,  # 最大输出 token 数，限制生成回复的长度
+        "max_tokens": 1024,  # 最大输出 token 数，限制生成回复的长度
         "do_sample": True,  # 是否启用采样（随机性），True 表示不是完全贪心搜索
         "repetition_penalty": 1.1,  # 重复惩罚系数，>1 会惩罚模型重复的内容，这里 1.0 表示不做惩罚
         "temperature": 0.4,  # 温度系数，控制生成的随机性。越接近 0 越确定，越大越随机，这里 0.01 表示几乎确定性输出

@@ -318,8 +318,9 @@ def process_images(
                     image = frame2
 
             else:
-                print('获取不到第二张图片，使用第一张切片')
+                print('获取不到第二张图片，退出')
                 timestamp = action_time
+                return '失败'  ##退出
 
         except Exception as e:
             print(f"处理第二张图片时出错：{e},使用第一张切片")

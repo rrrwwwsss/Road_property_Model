@@ -41,7 +41,7 @@ def compute_iou(box1, box2):
     return inter_area / union_area
 
 # 判断所有框是否都匹配
-def all_boxes_match(current_boxes, previous_boxes, iou_threshold=0.9):
+def all_boxes_match(current_boxes, previous_boxes, iou_threshold=0.5):
     for cur in current_boxes:
         matched = False
         for prev in previous_boxes:
@@ -146,13 +146,13 @@ def write_to_csv(data):
 
     # 解析“发生时间”列为 datetime
     df["发生时间_dt"] = pd.to_datetime(df["发生时间"], format="%Y%m%d_%H%M%S", errors="coerce")
-
+    hours = 48
     # 筛选与 time 相差不超过 24 小时的元组（绝对差值）
-    df_filtered = df[df["发生时间_dt"].apply(lambda t: abs(t - time) <= timedelta(hours=24))]
+    df_filtered = df[df["发生时间_dt"].apply(lambda t: abs(t - time) <= timedelta(hours=hours))]
 
     # 如果没有符合条件的行，直接返回
     if df_filtered.empty:
-        print("没有在24小时内的记录")
+        print(f"没有在{hours}小时内的记录")
         # 写入临时文件
         write_to_sqlite(data)
         return "文件已写入临时表"
@@ -165,7 +165,7 @@ def write_to_csv(data):
 
         print("最大时间差（小时）:", max_diff)
         if max_diff > 1:
-            print("存在距离超过 4 小时的记录 ✅")
+            print(f"存在距离超过{max_diff}小时的记录 ✅")
             print('df_filtered',df_filtered)
             print('pd.DataFrame(data)',pd.DataFrame(data))
             df_filtered = pd.concat([df_filtered, pd.DataFrame([data])], ignore_index=True)#data是一个字典，所以要把这个字典放进列表里，这样才会被识别成一条记录，新增1行。

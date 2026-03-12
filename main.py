@@ -38,19 +38,30 @@ You are an intelligent assistant capable of accurately identifying road occupati
 Analyze the provided image and determine whether there are vehicles currently engaged in road occupation or excavation work.
 The focus is on identifying *ongoing occupation or excavation activities*, not merely the presence of vehicles.
 
-**To be recognized as an occupation or excavation activity, the following three conditions must all be met:**
+
+**To be recognized as an occupation or excavation activity, the following three conditions must all be met.All are indispensable:**
 
 1. The occupation or excavation activity itself is visibly taking place.
 2. The surrounding area shows clear construction-related signs or obstacles, such as fences, traffic cones, or piles of soil.
    *(Note: Do not confuse ordinary road obstacles with construction-related ones.)*
 3. There are people around the vehicles directing or participating in the work.
 
+*** [CRITICAL PRIORITY] Emergency Vehicle Filter ***:
+Zero Tolerance: If the image contains a police car or an ambulance (identified by specific liveries, sirens, or emergency lights), you must immediately determine the result as "no".(Note: Please carefully distinguish the images. In some images, some police cars may not be clear.
+This rule overrides all other criteria, as these scenes represent emergency responses or traffic accidents rather than planned construction/occupation.
+
+**Points that are prone to misjudgment require special attention during identification. Do not mistake them for road occupation behavior**:
+1. Construction vehicles parked by the roadside
+2. Construction vehicles traveling normally, especially those carrying roadblocks.
+3. The pictures are not clear due to reasons such as lighting.
+
 **Exclusion criteria:**
 
 1. Ignore large vehicles that are parked or driving within safe zones and not participating in construction.
 2. Ignore buildings, pedestrians, toll booths, and road dividers.
-3. If the picture is unclear and affects your judgment, please ignore it.
-4. Ignoring normal road maintenance behaviors
+3. Emergency Vehicles: As stated above, any presence of police or medical emergency vehicles = "no".
+4. If the picture is unclear and affects your judgment, please ignore it.
+5. Ignoring normal road maintenance behaviors
    If the image is too blurry, obscured, or poorly lit to make an accurate judgment, respond with **“no.”**
 
 """
@@ -77,7 +88,7 @@ Note: If the lighting is extremely dark, the image is severely blurred, or refle
 gongbiao_question = """
 Role: You are an intelligent assistant with the ability to recognize road signs or billboards. You can accurately extract and analyze the text content.
 Task: Please identify the signs or billboards on the road (please note: this refers to the road itself, not the buildings beside the road. If the sign is a common one on buildings, please ignore it! Also, ignore vehicle advertisements or signs). Extract the text content and determine whether it is related to "public affairs" or "personal affairs":
-Words related to "personal affairs" include: "Welcome to **", "Advertisement of **", "Vehicle Maintenance of **", "Recruitment of **", etc.
+Words related to "personal affairs" include:"Advertisement of **", "Vehicle Maintenance of **", "Recruitment of **", etc.
 Words related to "public affairs" include: 1) Words related to "transportation" (such as "Maximum Load of **", "Prohibition of **", "Drunk Driving of **", "Transportation of **", "Drive **", "Fasten Seat Belt", "Section of **", "Be Careful of **", etc.); 
 2) Place names (such as Beijing, Shanghai, Xicheng District, Yao Guantun, Huangcun, etc.); 
 3) Indicative words (such as "Parking Lot of **", "Gas Station of **", etc.)
@@ -91,54 +102,67 @@ If related to transportation or official business, reply:
 - The coordinates should be based on a 1000x1000 image size.
 """
 # 设置悬挂物
-# xuangua_question = """
-# Role: You are an intelligent assistant capable of accurately identifying instances of illegal items being hung above roads or within the road area. Your task is to detect the presence of non-standard and illegal hanging objects and return their positions in the image.
-#
-# Task: Analyze the image and determine if there are any illegal items suspended above the road, such as banners, ropes, decorations, or other non-road infrastructure objects. Ignore pedestrians, vehicles (including parked vehicles), and legal road accessories (such as traffic signals, traffic signs, lamp posts, surveillance cameras, traffic guidance devices, etc.).
-#
-# Note: These items must first be hung from the highway infrastructure before they can be detected. If the hanging object is clearly an official facility, please reply "no". Or if it is impossible to determine whether it is legal or not, also reply "no" to avoid a wrong judgment.
-#
-# Output format: If illegal items are detected hanging above the road or within the road area, please return: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]} with the coordinates based on the 1000x1000 image size. Otherwise, please return: {"result": "no"}.
-# """
 xuangua_question = """
+Role: You are an intelligent assistant. Your task is to detect any behaviors that may endanger road safety, such as installing pipes or hanging items on road infrastructure, and return the location of such items in the image.
 
-# Role
-您是一位道路安全AI检测员，请分析图像，识别并定位位于行车道正上方且可能危及交通安全的非法悬挂物。
+Task: Analyze the image and determine if there are any illegal items hanging above the road, such as ropes, decorations, or other non-road infrastructure items.
 
-# Detection Target (Positive Class)
-请寻找悬挂在道路上方空间的异常物品，包括但不限于：
-1. 私人悬挂物（如横幅、私人装饰、衣物等）。
-2. 非交通用途的掉落悬挂物或未固定的建筑材料。
-*注意：仅关注物理位置处于道路上方（Overhead）且可能造成掉落风险或视线遮挡的物体。注意：如果是那种道路上面有桥的要忽略桥上正常行驶的车辆以及桥上正常的横幅*
+Please ignore the following - *Must be strictly ignored*: 
+1. Legal traffic facilities: traffic signals, signs, overpasses, street lamps, surveillance cameras, official cables/wires, traffic information screens.
+2. Background objects: objects that only adhere to the walls of roadside buildings (not extending above the road), roadside trees (including extended branches and leaves), road debris.
+3. Legal infrastructure: drainage pipes attached to bridges, fixed pipes closely adhering to the bridge structure (unless the pipes are in a broken or abnormally suspended state).
+4. Irrelevant details: light spots, shadows, rain and fog interference, minor objects that do not pose a threat to traffic safety (such as a small harmless rope end hanging from the bridge).
+5. Moving targets: pedestrians, vehicles (including parked vehicles).
+6. Normal phenomena related to bridges:
+- Vehicles traveling normally on overpasses/bridges. **
+Official slogans or promotional banners fixed to the guardrails or structures of the bridge. **
+7. **Artificial processing traces in images:**
+- **Purely black boxes, masking blocks, artificially painted areas, or post-processing annotation boxes. **
+8. **Lanterns, Chinese knots and other decorations: According to the project requirements, all lanterns are regarded as either legal or non-essential items. **
 
-# Exclusion Criteria (Negative Class) - *必须严格忽略*
-1. 合法交通设施：交通信号灯、标志牌、龙门架、路灯、监控摄像头、官方电缆/电线、交通诱导屏。
-2. 背景物体：仅附着在路边建筑物墙面上的物体（未延伸至道路上方）、路边的树木（包括伸出的树枝和树叶）、路面杂物。
-3. 合法基建：桥梁附属的排水管、紧贴桥梁结构的固定管道（除非管道呈断裂或异常悬垂状态）。
-4. 无关细节：光斑、阴影、雨雾干扰、对交通安全无威胁的细微物体（如桥梁垂下的一小段无害绳头）。
-5. 移动目标：行人、车辆（含停放车辆）。
-6. 桥梁相关正常现象：
-   - **在立交桥/桥梁上正常行驶的车辆。**
-   - **固定在桥梁护栏或结构上的官方标语、宣传横幅。**
-7. **图像人工处理痕迹：**
-   - **纯黑色的方框、遮盖块、人工涂抹区域或后期处理的标注框。**
-8. **灯笼：根据项目要求，所有灯笼均视为合法或忽略项。**
+Note: If there are words on the item, extract the text content and analyze its nature. If it is related to traffic, public slogans, or place names, ignore it. If the image is blurry, or due to rain, fog, or lighting reasons, the view is obstructed, and it is impossible to clearly see the image, reply "no" to avoid making a wrong judgment.
 
-# Text Analysis Logic
-如果检测对象包含文字，执行OCR分析：
-- 若内容为交通指令、地名、公共标语或官方公告 -> 忽略（视为合法设施）。
-- 若内容为商业广告、私人信息或无法识别的非官方文本 -> 保留（视为非法悬挂物）。
-
-# Quality Control
-如果图像因模糊、过暗、过曝或恶劣天气（雨/雾）导致无法做出可靠判断，必须直接返回 {"result": "no"}。
-
-# Output Format
-- 如果检测到目标：
-  {"result": "yes", "bounding_boxes": [[xmin, ymin, xmax, ymax], ...], "xvanguawu": "物品名称"}
-  *注：坐标需归一化并映射到 1000x1000 像素参考系。*
-- 如果未检测到目标或图像质量差：
-  {"result": "no"}
+Output :Firstly, the analysis process is presented. Additionally,if the above behavior can be identified, then the following result will be returned: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]}, where the coordinates have been converted to a reference coordinate system of 1000x1000 pixels. Otherwise, return {"result": "no"}.
 """
+# xuangua_question = """
+#
+# # Role
+# 您是一位道路安全AI检测员，请分析图像，识别并定位位于行车道正上方且可能危及交通安全的非法悬挂物。
+#
+# # Detection Target (Positive Class)
+# 请寻找悬挂在道路上方空间的异常物品，包括但不限于：
+# 1. 私人悬挂物（如横幅、私人装饰、衣物等）。
+# 2. 非交通用途的掉落悬挂物或未固定的建筑材料。
+# *注意：仅关注物理位置处于道路上方（Overhead）且可能造成掉落风险或视线遮挡的物体。注意：如果是那种道路上面有桥的要忽略桥上正常行驶的车辆以及桥上正常的横幅*
+#
+# # Exclusion Criteria (Negative Class) - *必须严格忽略*
+# 1. 合法交通设施：交通信号灯、标志牌、龙门架、路灯、监控摄像头、官方电缆/电线、交通诱导屏。
+# 2. 背景物体：仅附着在路边建筑物墙面上的物体（未延伸至道路上方）、路边的树木（包括伸出的树枝和树叶）、路面杂物。
+# 3. 合法基建：桥梁附属的排水管、紧贴桥梁结构的固定管道（除非管道呈断裂或异常悬垂状态）。
+# 4. 无关细节：光斑、阴影、雨雾干扰、对交通安全无威胁的细微物体（如桥梁垂下的一小段无害绳头）。
+# 5. 移动目标：行人、车辆（含停放车辆）。
+# 6. 桥梁相关正常现象：
+#    - **在立交桥/桥梁上正常行驶的车辆。**
+#    - **固定在桥梁护栏或结构上的官方标语、宣传横幅。**
+# 7. **图像人工处理痕迹：**
+#    - **纯黑色的方框、遮盖块、人工涂抹区域或后期处理的标注框。**
+# 8. **灯笼：根据项目要求，所有灯笼均视为合法或忽略项。**
+#
+# # Text Analysis Logic
+# 如果检测对象包含文字，执行OCR分析：
+# - 若内容为交通指令、地名、公共标语或官方公告 -> 忽略（视为合法设施）。
+# - 若内容为商业广告、私人信息或无法识别的非官方文本 -> 保留（视为非法悬挂物）。
+#
+# # Quality Control
+# 如果图像因模糊、过暗、过曝或恶劣天气（雨/雾）导致无法做出可靠判断，必须直接返回 {"result": "no"}。
+#
+# # Output Format
+# - 如果检测到目标：
+#   {"result": "yes", "bounding_boxes": [[xmin, ymin, xmax, ymax], ...], "xvanguawu": "物品名称"}
+#   *注：坐标需归一化并映射到 1000x1000 像素参考系。*
+# - 如果未检测到目标或图像质量差：
+#   {"result": "no"}
+# """
 #
 # 堆放物品
 # wupin_question = """
