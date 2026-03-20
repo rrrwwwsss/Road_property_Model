@@ -1,0 +1,470 @@
+﻿image_path,model_result
+selected\camera_11011501071328440096_2025-08-17_04-42-50.jpg,"This image shows a section of the Beijing-G45 Daguang Expressway at night. The timestamp indicates it was taken on August 17, 2025, at 04:52:56. The location is specified as K1337+170, with the camera labeled as CCTV026, capturing the northbound lanes. The text at the bottom indicates that this is 200 meters north of the Xueying Entrance Toll Station on the Daguang Expressway.
+
+The image shows a multi-lane highway with some vehicles visible, their headlights illuminating the road ahead. The road is well-lit with streetlights, and there are signs and barriers along the sides. The overall scene is typical of a highway at night, with clear visibility due to the artificial lighting."
+selected\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"This image shows a section of the Beijing-G45 Daguang Expressway, specifically at kilometer 1337+170, as captured by CCTV camera 026. The timestamp indicates that the photo was taken on August 24, 2025, at 12:47:24. The location is described as 200 meters north of the Xueying Entrance Toll Station on the outbound route of the Daguang Expressway.
+
+The highway appears to be a multi-lane road with vehicles traveling in both directions. There are green barriers and trees lining the sides of the road, and the weather seems clear. The text at the bottom of the image confirms the location as being 200 meters north of the Xueying Entrance Toll Station."
+selected\camera_11011501071328440096_2025-08-24_15-49-23.jpg,"The image shows a section of the Beijing-G45 Daguang Expressway, specifically at kilometer 1337+170, as captured by CCTV camera 026. The timestamp indicates that the photo was taken on August 24, 2025, at 15:59:26. The location is described as 200 meters north of the Xueying Entrance Toll Station on the outbound route of the Daguang Expressway.
+
+The road appears to be relatively clear with a few vehicles visible. On the left side, there is a bus and some other vehicles at an intersection, while the main expressway on the right has minimal traffic. The surrounding area is lined with trees and some buildings are visible in the background. A sign on the right side of the road indicates ""Guaxiang Bridge."""
+baitan\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+
+1. **Road and Sidewalk Areas**: The image shows a multi-lane highway with clear road markings and barriers. There are no visible sidewalks or pedestrian areas adjacent to the road.
+
+2. **Presence of Stalls or Vendors**: There are no visible signs of stalls, mobile vendors, or temporary booths. The road is clear of any such structures or activities.
+
+3. **Traffic and Environment**: The image shows vehicles on the road and greenery along the sides. There are no indications of roadside selling or any related activities.
+
+4. **Uncertainty Check**: Since there are no visible stalls or vendors, and the road is clear, there is no ambiguity in this case.
+
+### Result:
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-17_04-42-50.jpg,"### Analysis Process:
+
+1. **Road and Sidewalk Visibility**: The image shows a highway at night with clear lanes and sidewalks. There are no visible structures or objects that resemble stalls or temporary booths on the road or sidewalks.
+
+2. **Presence of Vendors**: There are no visible individuals or groups that could be identified as vendors. The image primarily shows vehicles on the road and no human activity outside the vehicles.
+
+3. **Stall Setup**: There are no signs of stalls, such as tables, tents, or other equipment typically used for roadside selling. The road and sidewalks appear clear of such setups.
+
+4. **Contextual Clues**: The image is a traffic camera view of a highway, which is not a typical location for roadside selling. The timestamp and location details further confirm that this is a highway setting.
+
+### Conclusion:
+
+Based on the analysis, there are no obvious signs of roadside selling, mobile stalls, or temporary booths occupying roads or sidewalks. Both the setup of stalls and the presence of vendors are absent.
+
+**Output**: {""result"": ""no""}"
+selected\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+
+1. **Road and Sidewalk Areas**: The image shows a multi-lane highway with clear road markings and barriers. There are no visible sidewalks or pedestrian areas adjacent to the road.
+
+2. **Presence of Stalls or Vendors**: There are no visible signs of stalls, mobile vendors, or temporary booths. The road is clear of any such structures or activities.
+
+3. **Traffic and Environment**: The image shows vehicles on the road and greenery along the sides. There are no indications of roadside selling or any related activities.
+
+4. **Uncertainty Check**: Since there are no visible signs of stalls or vendors, and the road is clear, there is no uncertainty about the presence of such activities.
+
+### Result:
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-24_15-49-23.jpg,"### Analysis Process:
+
+1. **Road and Sidewalk Areas**: The image shows a highway and an adjacent road with vehicles, including cars, buses, and trucks. There are no visible signs of stalls, temporary booths, or vendors on the road or sidewalks.
+
+2. **Presence of Vendors and Stalls**: There are no individuals or groups that appear to be setting up or operating stalls. The vehicles on the road are in motion or parked legally, and there are no signs of goods being displayed or sold.
+
+3. **Environment and Context**: The image primarily depicts a highway and a road intersection with traffic. There are no indications of illegal roadside selling activities.
+
+### Conclusion:
+There are no obvious signs of roadside selling, mobile stalls, or temporary booths occupying roads or sidewalks in this image.
+
+```json
+{""result"": ""no""}
+```"
+gongbiao\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+1. **Identify Road Signs/Billboards**: 
+   - The image contains a road sign on the left side of the road. The sign is rectangular and mounted on a pole, but the text on it is not clearly visible due to the angle and distance.
+   - There are no other visible signs or billboards on the road itself.
+
+2. **Text Extraction and Categorization**:
+   - The text on the road sign is not legible, so it cannot be extracted or categorized.
+   - The text in the upper left corner of the image is related to the road name and location, which is irrelevant to the task as per the instructions.
+
+3. **Determine Relevance**:
+   - Since the text on the road sign is not legible, it cannot be determined whether it is related to ""public affairs"" or ""personal affairs.""
+   - The other text in the image is not part of the road signs or billboards and should be ignored.
+
+### Output:
+```json
+{
+    ""result"": ""no"",
+    ""Content"": ""The text on the road sign is not legible.""
+}
+```"
+selected\camera_11011501071328440096_2025-08-17_04-42-50.jpg,"### Analysis Process:
+
+1. **Identify Road Signs/Billboards:**
+   - The image shows a highway at night with several signs and billboards. The focus is on the signs directly on the road or related to the road infrastructure.
+
+2. **Extract Text Content:**
+   - The text on the signs is not clearly visible due to the lighting and resolution. However, there is a large billboard on the left side of the road, but its content is not legible.
+
+3. **Determine Relevance:**
+   - The billboard on the left side of the road appears to be related to public affairs, possibly providing information about the road or a nearby facility. However, due to the lack of clarity, it is difficult to confirm the exact content.
+
+4. **Check for Personal Affairs Vocabulary:**
+   - There is no visible text that matches the vocabulary related to personal affairs such as advertisements, car maintenance, or recruitment.
+
+5. **Check for Public Affairs Vocabulary:**
+   - The text at the bottom of the image, ""出京-大广-薛营入口收费站北200米,"" is related to public affairs as it provides information about a location and a distance to a toll station. However, this text is not on a sign but is an annotation in the image.
+
+### Output:
+
+Since the text on the signs is not clearly visible and the only text present is an annotation, the result is:
+
+```json
+{
+    ""result"": ""no"",
+    ""Content"": ""出京-大广-薛营入口收费站北200米""
+}
+```"
+selected\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+1. **Identify Road Signs/Billboards**: 
+   - The image contains a road sign on the left side of the road. It is a blank sign, with no visible text or symbols.
+   - There are no other visible signs or billboards on the road itself.
+
+2. **Text Extraction**:
+   - The blank sign does not contain any text, so no content can be extracted from it.
+
+3. **Determine Relevance**:
+   - Since there is no text on the road signs or billboards, there is no content to classify as ""personal affairs"" or ""public affairs.""
+
+### Output:
+```json
+{
+    ""result"": ""no"",
+    ""Content"": """"
+}
+```"
+selected\camera_11011501071328440096_2025-08-24_15-49-23.jpg,"### Analysis Process:
+
+1. **Identify Road Signs/Billboards:**
+   - The image contains a green road sign on the right side of the road with the text ""瓜乡桥"" (Guāxiāng Bridge).
+
+2. **Determine the Nature of the Text:**
+   - The text ""瓜乡桥"" is a place name, which is related to public affairs under the category of place names.
+
+3. **Check for Personal Affairs Vocabulary:**
+   - There is no text related to personal affairs such as advertisements, car maintenance, or recruitment.
+
+4. **Ignore Irrelevant Text:**
+   - The text in the upper left corner is related to the annotation of the image and is not part of the road signs or billboards.
+
+### Output:
+
+```json
+{
+    ""result"": ""no"",
+    ""Content"": ""瓜乡桥""
+}
+```"
+jinggai\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+
+1. **Road Surface Inspection**: The image shows a multi-lane highway with vehicles in motion. The road surface appears smooth and intact, with no visible circular or square voids that would indicate a missing manhole cover.
+
+2. **Focus on Potential Locations**: Manhole covers are typically located on the road surface or within the road land area. In this image, the road surface is clear, and there are no visible signs of exposed manholes.
+
+3. **Exclusion of Other Elements**: The image includes vehicles, road markings, and surrounding greenery. These elements have been ignored as per the instructions.
+
+4. **Conclusion**: After a thorough examination of the road surface and surrounding areas, there are no indications of a missing or removed manhole cover.
+
+### Result:
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-17_04-42-50.jpg,"### Analysis Process:
+
+1. **Image Overview**: The image shows a nighttime view of a multi-lane highway with vehicles traveling on it. The road is well-lit by streetlights, and the lanes are clearly marked.
+
+2. **Focus on Road Surface**: The road surface appears smooth, with no visible irregularities such as circular or square voids that would indicate a missing manhole cover. The lanes are continuous, and there are no disruptions in the road surface that would suggest an exposed manhole opening.
+
+3. **Examine Potential Areas**: 
+   - The image includes the main lanes, the shoulder, and the median. Each of these areas has been examined for any signs of a missing manhole cover.
+   - The lighting is sufficient to detect any significant voids or irregularities on the road surface.
+
+4. **Conclusion**: After a thorough examination of the road surface, there are no visible signs of a missing manhole cover. The road appears to be in good condition with no exposed manhole openings.
+
+### Result:
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+
+1. **Road Surface Inspection**: 
+   - The image shows a multi-lane highway with vehicles traveling in both directions. The road surface appears smooth and well-maintained, with no visible irregularities such as circular or square voids that would indicate a missing manhole cover.
+
+2. **Focus on Potential Locations**:
+   - Manhole covers are typically located on the road surface or within the road land area. In this image, the road surface is clear, and there are no visible signs of exposed manholes or missing covers.
+
+3. **Exclusion of Other Elements**:
+   - Vehicles, pedestrians, and other objects on the road have been ignored as per the instructions. The focus remains solely on the road surface and its condition.
+
+4. **Conclusion**:
+   - After a thorough examination of the road surface, there are no indications of a missing manhole cover or exposed manhole openings.
+
+### Result:
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-24_15-49-23.jpg,"### Analysis Process:
+
+1. **Road Surface Examination**:  
+   - The image shows a highway and an intersection with various lanes. The road surface appears smooth, with no visible circular or square voids that would indicate a missing manhole cover.  
+   - The lanes are marked with clear white lines, and there are no irregularities in the road surface that suggest an exposed manhole opening.
+
+2. **Focus on Potential Locations**:  
+   - Manhole covers are typically located in the middle of the road, near curbs, or in areas where utilities are present.  
+   - The image does not show any such areas with missing covers. The road surface is consistent, with no interruptions or holes.
+
+3. **Consideration of Surroundings**:  
+   - The surrounding areas, such as the sidewalks and greenery, do not show any signs of missing manhole covers either.  
+   - The vehicles and other objects in the image do not obscure any potential missing manhole covers.
+
+### Conclusion:
+
+There are no visible signs of a missing or removed manhole cover in the image. The road surface is intact, and no circular or square voids are present.
+
+**Output**:  
+```json
+{""result"": ""no""}
+```"
+wajue\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+
+1. **Identify Large Stationary Vehicles:**
+   - The image shows a highway with multiple lanes of traffic. There are no large stationary vehicles such as construction trucks, engineering vehicles, or excavators visible in the image. All vehicles appear to be in motion or waiting in traffic.
+
+2. **Check for Construction Operation State:**
+   - There are no vehicles with tilted bodies, unloading/loading activities, or digging arms in operation.
+   - No mechanical arms or fixed devices are in contact with the road surface.
+   - There are no visible construction signs, obstacles, fences, cones, or earth mounds that indicate construction activities.
+   - No personnel are interacting with vehicles in a manner that suggests construction or road work.
+
+3. **Consider Interfering Content:**
+   - The image is clear, and there are no obstructions or lack of light that would prevent accurate analysis.
+   - Normal vehicle movement and road dividers are present but do not interfere with the analysis.
+
+### Conclusion:
+There are no vehicles engaged in road occupation or digging activities in the image.
+
+**Output:**
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-17_04-42-50.jpg,"### Analysis Process:
+
+1. **Identify Large Stationary Vehicles:**
+   - The image shows a highway at night with a few vehicles. There are no large stationary vehicles such as construction trucks, engineering vehicles, or excavators visible. The vehicles present appear to be in motion or waiting to pass.
+
+2. **Check for Construction Operation State:**
+   - There are no vehicles with tilted bodies, unloading/loading activities, or mechanical arms in operation.
+   - No digging arms, buckets, or mechanical arms are in contact with the road surface.
+   - There are no visible construction signs, obstacles, fences, cones, or earth mounds that indicate construction activities.
+   - No personnel are interacting with any vehicles in a manner that suggests construction or road occupation.
+
+3. **Consider Interfering Content:**
+   - The image is clear enough to identify the vehicles and their activities. There is no significant obstruction or lack of light that would prevent accurate determination.
+
+### Conclusion:
+There are no vehicles engaged in road occupation or digging activities in this image.
+
+**Output:**
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+
+1. **Identify Large Stationary Vehicles:**
+   - The image shows a highway with multiple lanes of traffic. There are no large stationary vehicles such as construction trucks, engineering vehicles, or excavators visible in the image. All vehicles appear to be in motion or parked in a manner consistent with normal traffic flow.
+
+2. **Check for Construction Operation State:**
+   - There are no vehicles with tilted bodies, unloading/loading activities, or operating digging arms/buckets.
+   - No mechanical arms or fixed devices are in contact with the road surface.
+   - There are no visible construction signs, obstacles, fences, cones, or earth mounds that indicate construction activity.
+   - No personnel are interacting with vehicles in a manner that suggests construction or road work.
+
+3. **Consider Interfering Content:**
+   - The image is clear, and there are no obstructions or lack of light that would prevent accurate analysis.
+
+### Conclusion:
+There are no vehicles engaged in road occupation/digging activities in the image.
+
+**Output:**
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-24_15-49-23.jpg,"### Analysis Process:
+
+1. **Identify Large Stationary Vehicles:**
+   - There are no large stationary vehicles such as construction trucks, engineering vehicles, or excavators visible in the image. All vehicles appear to be either moving normally or waiting at the intersection.
+
+2. **Check for Construction Operation State:**
+   - There are no vehicles with tilted bodies, unloading/loading activities, or operating digging arms/buckets.
+   - No mechanical arms or fixed devices are in contact with the road surface.
+   - There are no visible construction signs, obstacles, fences, cones, or earth mounds indicating construction activity.
+   - No personnel are interacting with vehicles in a manner that suggests construction or road occupation.
+
+3. **Consider Interfering Content:**
+   - The image is clear, and there are no obstructions or lack of light that would prevent accurate analysis.
+   - Normal vehicle movement and waiting at the intersection are present but do not interfere with the analysis.
+
+### Conclusion:
+There are no vehicles engaged in road occupation or digging activities in the image.
+
+**Output:**
+```json
+{""result"": ""no""}
+```"
+wupin\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+
+1. **Road Overview**: The image shows a multi-lane highway with vehicles traveling in both directions. The road is bordered by greenery and has standard road markings and barriers.
+
+2. **Focus on Stacking Items**: The task is to identify any items that are stacked on or within the road area. This excludes vehicles, pedestrians, guardrails, utility poles, and road obstacles.
+
+3. **Examination of the Road Area**:
+   - The road is clear of any visible items that are stacked or placed on it.
+   - There are no objects on the road surface that appear to be stacked or piled up.
+   - The vehicles are on the road, but they are not considered as stacked items.
+
+4. **Conclusion**: There are no items stacked on or within the road area in this image.
+
+### Result:
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-17_04-42-50.jpg,"### Analysis Process:
+
+1. **Road Overview**: The image shows a highway at night with multiple lanes. The road is well-lit by streetlights, and there are vehicles visible on the road.
+
+2. **Vehicles and Objects**: 
+   - There are vehicles on the road, but no visible items are stacked on or within the road area. 
+   - The vehicles are in motion, and their headlights are on, but there are no signs of items being stacked on them or the road.
+
+3. **Roadside and Median**: 
+   - The roadside and median areas are clear. There are no items piled up along the sides of the road or in the median.
+
+4. **Guardrails and Utility Poles**: 
+   - The guardrails and utility poles are present but do not have any items stacked on them.
+
+5. **Other Observations**: 
+   - There are no pedestrians or road obstacles visible in the image.
+   - The road appears to be in normal use with no signs of abnormal activity.
+
+### Conclusion:
+Based on the analysis, there are no items piled up on the road or within the road area. The image only shows vehicles in motion and standard road infrastructure.
+
+### Output:
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+
+1. **Road Overview**: The image shows a multi-lane highway with vehicles traveling in both directions. The road is bordered by greenery and has standard road markings and barriers.
+
+2. **Focus on Stacking Items**: The task is to identify any items that are stacked on or within the road area. This excludes vehicles, pedestrians, guardrails, utility poles, and road obstacles.
+
+3. **Examination of the Road Area**:
+   - The road is clear of any visible items that appear to be stacked.
+   - There are no objects on the road surface that resemble stacked items.
+   - The vehicles on the road are in motion and do not have any items stacked on them.
+
+4. **Conclusion**: Based on the visual inspection, there are no items stacked on or within the road area.
+
+### Result:
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-24_15-49-23.jpg,"### Analysis Process:
+
+1. **Road Overview**: The image shows a highway with multiple lanes and a side road with vehicles. The road appears to be in good condition, with no visible obstructions or items stacked on the road surface.
+
+2. **Vehicles and Objects**: 
+   - There are vehicles on the road, including cars, buses, and trucks. These are not considered as items being stacked on the road.
+   - No pedestrians, guardrails, utility poles, or road obstacles are present in a manner that suggests stacking.
+
+3. **Potential Stacking Areas**:
+   - The road surface is clear, with no visible items piled up.
+   - The side areas of the road, including the grassy patches and the shoulder, do not show any signs of items being stacked.
+
+4. **Conclusion**: Based on the analysis, there are no items piled up on the road or within the road area. The road is clear of any such obstructions.
+
+### Output:
+```json
+{""result"": ""no""}
+```"
+xuangua\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+
+1. **Identify Road Infrastructure Elements**:  
+   - Legal road infrastructure includes traffic signs, lamp posts, surveillance cameras, and traffic guidance devices. These are typically mounted on poles or structures and are part of the road's standard setup.
+
+2. **Examine Suspended Objects**:  
+   - Look for any objects hanging above the road that are not part of the standard road infrastructure. This includes banners, ropes, decorations, or other items that are not typically found in a highway setting.
+
+3. **Check for Non-Standard Items**:  
+   - Ensure that any detected objects are not part of the legal road infrastructure. For example, a traffic sign is legal, but a banner hanging from a tree or a rope strung across the road would be illegal.
+
+### Image Analysis:
+
+- The image shows a highway with multiple lanes, traffic signs, and surveillance cameras.  
+- There are no visible banners, ropes, decorations, or other non-standard items hanging above the road.  
+- All objects above the road appear to be part of the legal road infrastructure, such as traffic signs and surveillance cameras.
+
+### Conclusion:
+
+There are no illegal items suspended above the road in this image.
+
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-17_04-42-50.jpg,"### Analysis Process:
+
+1. **Identify Road Infrastructure Elements**:
+   - The image shows a highway at night with visible road infrastructure such as lamp posts, traffic signs, and surveillance cameras.
+   - The road is divided into multiple lanes with clear lane markings.
+
+2. **Examine Suspended Objects**:
+   - Look for any objects hanging above the road that are not part of standard road infrastructure.
+   - Focus on elements like banners, ropes, decorations, or other non-standard items.
+
+3. **Assess Legal Road Accessories**:
+   - Recognize legal accessories such as traffic signals, signs, and surveillance cameras.
+   - These are typically mounted on poles or structures and are part of the road's operational setup.
+
+4. **Detect Non-Standard Items**:
+   - Carefully examine the image for any irregularities or objects that do not conform to standard road infrastructure.
+   - Ensure that any detected items are not part of the legal road accessories.
+
+### Result:
+
+After analyzing the image, there are no visible illegal items hanging above the road. All objects appear to be standard road infrastructure elements such as lamp posts, traffic signs, and surveillance cameras.
+
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-24_12-37-21.jpg,"### Analysis Process:
+
+1. **Identify Road Infrastructure Elements**:
+   - The image shows a highway with multiple lanes, road signs, traffic signals, and surveillance cameras. These are standard road infrastructure elements.
+
+2. **Check for Suspended Objects**:
+   - Look for any objects hanging above the road that are not part of the standard road infrastructure. This includes banners, ropes, decorations, or other non-road infrastructure items.
+
+3. **Examine the Image**:
+   - The image shows a clear view of the highway with no visible banners, ropes, or decorations hanging above the road.
+   - The objects present above the road are traffic signs, surveillance cameras, and lamp posts, which are all legal road accessories.
+
+4. **Conclusion**:
+   - There are no illegal items suspended above the road in this image.
+
+### Result:
+```json
+{""result"": ""no""}
+```"
+selected\camera_11011501071328440096_2025-08-24_15-49-23.jpg,"### Analysis Process:
+
+1. **Road Infrastructure Review**: 
+   - The image shows a highway with standard road infrastructure, including traffic signs, barriers, and surveillance cameras. These are legal and expected elements.
+
+2. **Suspension Check**:
+   - There are no visible banners, ropes, decorations, or other non-standard items hanging above the road. The objects above the road are consistent with typical road infrastructure.
+
+3. **Non-Road Infrastructure Check**:
+   - The objects present above the road, such as traffic signs and surveillance cameras, are standard and legal. There are no irregular or illegal items detected.
+
+### Result:
+```json
+{""result"": ""no""}
+```"
