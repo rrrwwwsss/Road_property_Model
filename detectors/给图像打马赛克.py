@@ -1,4 +1,4 @@
-﻿import ast
+import ast
 
 import cv2
 import numpy as np
@@ -77,4 +77,3 @@ if __name__ == "__main__":
 
     pil_image = apply_mosaic_on_polygon("未合并到总模型的模块/camera_11000000001319850899_20251116_074837.jpg", points, kernel_size=(15, 15))
     pil_image.show()
-

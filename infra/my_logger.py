@@ -1,4 +1,4 @@
-﻿import os
+import os
 import sys
 import logging
 from logging.handlers import TimedRotatingFileHandler
@@ -82,4 +82,3 @@ class Logger:
     def get_logger(self):
         """返回 logger 对象"""
         return self.logger
-

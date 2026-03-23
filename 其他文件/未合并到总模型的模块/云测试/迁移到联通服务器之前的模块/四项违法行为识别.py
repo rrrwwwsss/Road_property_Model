@@ -3,16 +3,16 @@ import sqlite3
 
 import pandas as pd
 
-from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
-from 整合数据 import get_data
-from 摄像头截帧 import capture_frame_from_camera
+from detectors.公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
+from services.整合数据 import get_data
+from services.摄像头截帧 import capture_frame_from_camera
 from datetime import datetime, timedelta
 import os
 from PIL import Image
 import numpy as np
-from 配置 import *
+from config.配置 import *
 import csv
-from 查询许可数据库 import job
+from services.查询许可数据库 import job
 
 
 def write_to_sqlite(data):

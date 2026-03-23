@@ -1,4 +1,4 @@
-﻿from dataclasses import dataclass, field
+from dataclasses import dataclass, field
 from decimal import Decimal
 from typing import Optional
 from datetime import datetime

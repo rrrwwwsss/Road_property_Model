@@ -1,12 +1,12 @@
-﻿from datetime import datetime, timedelta
+from datetime import datetime
 import requests
 import cv2
 import os
-from PIL import Image, ImageDraw
+from PIL import Image
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-from config.配置 import BASE_URL, LINUX_PIC_PAT, USER_NAME, USER_PWD, YUANTU_PATH
+from config.配置 import *
 
 
 def close_video(invite_id):
@@ -174,4 +174,3 @@ def capture_frame_from_camera(camera_id):
         # 确保即使发生异常也会尝试关闭视频流
         if invite_id:
             close_video(invite_id)
-

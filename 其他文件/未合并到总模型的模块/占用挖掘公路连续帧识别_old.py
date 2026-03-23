@@ -3,16 +3,14 @@ import sqlite3
 
 import pandas as pd
 
-from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
+from detectors.公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
 from 整合数据 import get_data
-from 摄像头截帧 import capture_frame_from_camera
+from services.摄像头截帧 import capture_frame_from_camera
 from datetime import datetime, timedelta
 import os
 from PIL import Image
-import numpy as np
-from 配置 import *
-import csv
-from 查询许可数据库 import job
+from config.配置 import *
+from services.查询许可数据库 import job
 def write_to_sqlite(data):
     conn = sqlite3.connect(TEMPORARY_RECORD)
     cursor = conn.cursor()
@@ -200,7 +198,7 @@ def process_images(
             image = Image.open(source_path)
 
         # 调用模型识别模块输入提示词进行图像的识别，返回识别结果output_text
-        from 模型识别_docker import pattern_recognition
+        from services.模型识别_docker import pattern_recognition
         output_text = pattern_recognition(question, image)
 
         result_dict = safe_json_parse(output_text)

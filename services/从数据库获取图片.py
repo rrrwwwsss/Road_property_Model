@@ -1,7 +1,7 @@
-﻿import sqlite3
+import sqlite3
 from PIL import Image
 from datetime import datetime
-from config.配置 import IMAGE_DB, IMAGE_QIEPIAN_PATH
+from config.配置 import *
 
 # 连接到 SQLite 数据库
 def connect_to_db(db_path):
@@ -100,4 +100,3 @@ def process_violations(xingwei, camera_id):
 
     conn.close()
     return None
-

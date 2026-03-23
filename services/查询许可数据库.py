@@ -1,9 +1,8 @@
-﻿import dmPython
+import dmPython
 # import schedule
-import time
 import json
 from datetime import datetime, timedelta
-from config.配置 import XVKE_DB_CONFIG
+from config.配置 import *
 # 达梦数据库配置
 db_config = XVKE_DB_CONFIG
 # 全局变量存储查询结果
@@ -121,4 +120,3 @@ if __name__ == "__main__":
 #         schedule.run_pending()
 #         # 稍作延迟，避免 CPU 占用过高
 #         time.sleep(600)
-

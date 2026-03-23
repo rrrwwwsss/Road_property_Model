@@ -1,9 +1,8 @@
 import json
-import os
 import re
 
 import requests
-from 配置 import *
+from config.配置 import *
 from io import BytesIO
 import base64
 import urllib3

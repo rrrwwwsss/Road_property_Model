@@ -1,14 +1,5 @@
-﻿from flask import Flask, send_from_directory, abort
-from config.配置 import (
-    BAITAN_PATH,
-    DATA_BASE_PATH,
-    GONGBIAO_PATH,
-    JINGGAI_PATH,
-    WAJUE_PATH,
-    WUPIN_PATH,
-    XVANGUA_PATH,
-    YUANTU_PATH,
-)
+from flask import Flask, send_from_directory, abort
+from config.配置 import *
 # 初始化 Flask 应用
 app = Flask(__name__)
 
@@ -58,4 +49,3 @@ def run_flask_server():
 # 启动应用
 if __name__ == '__main__':
     run_flask_server()
-

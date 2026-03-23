@@ -1,7 +1,7 @@
-from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
-from 整合数据 import get_data
-from 摄像头截帧 import capture_frame_from_camera
-from 配置 import *
+from detectors.公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
+from services.整合数据 import get_data
+from services.摄像头截帧 import capture_frame_from_camera
+from config.配置 import *
 import sqlite3
 from datetime import datetime, timedelta
 import os
@@ -266,7 +266,7 @@ def process_images(
             image = Image.open(source_path)
 
         # 调用模型识别模块输入提示词进行图像的识别，返回识别结果output_text
-        from 模型识别_docker import pattern_recognition
+        from services.模型识别_docker import pattern_recognition
         output_text = pattern_recognition(question,image)
         # # 构建消息
         # messages = [

@@ -1,4 +1,4 @@
-﻿import os
+import os
 import time
 import traceback
 from config.配置 import YUANTU_PATH
@@ -31,5 +31,4 @@ def clear_begin():
 # 用法
 if __name__ == "__main__":
     clear_begin()
-
 

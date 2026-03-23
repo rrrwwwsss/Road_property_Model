@@ -1,7 +1,7 @@
-from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
-from 整合数据 import get_data
-from 摄像头截帧 import capture_frame_from_camera
-from 配置 import *
+from detectors.公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
+from services.整合数据 import get_data
+from services.摄像头截帧 import capture_frame_from_camera
+from config.配置 import *
 import sqlite3
 from datetime import datetime, timedelta
 import os

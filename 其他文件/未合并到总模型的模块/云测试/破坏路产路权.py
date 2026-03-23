@@ -1,8 +1,7 @@
 import requests
 import json
-from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
+from detectors.公共方法 import safe_json_parse, draw_bounding_boxes
 from datetime import datetime, timedelta
-import os
 from PIL import Image
 
 import os

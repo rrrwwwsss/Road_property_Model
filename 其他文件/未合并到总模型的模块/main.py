@@ -4,12 +4,12 @@ import traceback
 
 import pandas as pd
 
-from 获取摄像头点位数据 import get_dianwei_data
-from 配置 import *
+from services.获取摄像头点位数据 import get_dianwei_data
+from config.配置 import *
 from 未合并到总模型的模块.云测试.迁移到联通服务器之前的模块.四项违法行为识别 import poll_cameras
 from 未合并到总模型的模块.云测试.迁移到联通服务器之前的模块.堆放物品_摆设摊位 import poll_cameras1
-from 清理图片 import clear_begin
-from 托管本地图片到网络 import run_flask_server
+from services.清理图片 import clear_begin
+from services.托管本地图片到网络 import run_flask_server
 import sys
 # 关闭输出缓冲，解决打印堵塞问题
 sys.stdout.reconfigure(line_buffering=True)

@@ -2,13 +2,13 @@
 import threading
 
 import pandas as pd
-from 获取摄像头点位数据 import get_dianwei_data
-from 配置 import *
+from services.获取摄像头点位数据 import get_dianwei_data
+from config.配置 import *
 from 四项违法行为识别 import poll_cameras
 from 堆放物品_摆设摊位 import poll_cameras1
-from 清理图片 import clear_begin
-from 托管本地图片到网络 import run_flask_server
-from 定期推送数据库 import tuisong_main
+from services.清理图片 import clear_begin
+from services.托管本地图片到网络 import run_flask_server
+from services.定期推送数据库 import tuisong_main
 from 占用挖掘公路连续帧识别 import poll_cameras2
 import sys
 # 关闭输出缓冲，解决打印堵塞问题
@@ -282,7 +282,7 @@ def run_loop():
 if __name__ == '__main__':
     import multiprocessing
     import time
-    from my_logger import Logger
+    from infra.my_logger import Logger
     from logging.handlers import QueueListener
     log_queue = multiprocessing.Queue()
 

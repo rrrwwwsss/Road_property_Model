@@ -1,4 +1,4 @@
-﻿import json
+import json
 from datetime import datetime
 import uuid
 from config.数据库配置 import DB_CONFIG, OffsiteRule, OffsiteWarnsHb, OffsiteIntellectErrorsHb, OffsiteEvidenceConstant, VIOLATION_DICT,AUTHORITY_CODE
@@ -170,4 +170,3 @@ if __name__ == '__main__':
         "OffsiteRule_id": "792409a397d04c3a9252d3f61f0b91fc",
     }
     insert_database(data)
-
