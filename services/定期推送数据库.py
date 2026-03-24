@@ -4,7 +4,7 @@ import traceback
 import pandas as pd
 # import schedule
 
-from 提交数据库 import insert_database
+from services.提交数据库 import insert_database
 def tuisong(csv_file_path):
     # 使用 pandas 读取 CSV 文件
     def read_csv_to_dict(file_path):

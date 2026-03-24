@@ -1,9 +1,9 @@
 import csv
 import os
 
-from 获取摄像头点位数据 import get_dianwei_data
+from services.获取摄像头点位数据 import get_dianwei_data
 from config.数据库配置 import *
-from 提交数据库 import insert_database
+from services.提交数据库 import insert_database
 def get_data(model_data):
     # model_data = {
     #                 "工单编号": filename,

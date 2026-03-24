@@ -3,12 +3,12 @@ import json
 
 import pandas as pd
 
-from 公共方法 import *
+from detectors.公共方法 import *
 from services.整合数据 import get_data
 from datetime import timedelta
 import os
 
-from 给图像打马赛克 import apply_mosaic_on_polygon
+from detectors.给图像打马赛克 import apply_mosaic_on_polygon
 from services.查询许可数据库 import job
 from services.从数据库获取图片 import *
 

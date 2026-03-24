@@ -1,9 +1,9 @@
 import ast
 import json
-from 给图像打马赛克 import apply_mosaic_on_polygon
+from detectors.给图像打马赛克 import apply_mosaic_on_polygon
 import pandas as pd
 from services.模型识别_docker import pattern_recognition
-from 公共方法 import *
+from detectors.公共方法 import *
 from services.整合数据 import get_data
 from services.摄像头截帧 import capture_frame_from_camera
 from datetime import timedelta

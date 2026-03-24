@@ -1,4 +1,4 @@
-from 公共方法 import *
+from detectors.公共方法 import *
 from services.整合数据 import get_data
 from datetime import timedelta
 import os
