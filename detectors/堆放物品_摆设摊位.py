@@ -1,4 +1,4 @@
-from 公共方法 import safe_json_parse, rescale_bounding_boxes, draw_bounding_boxes
+from 公共方法 import *
 from services.整合数据 import get_data
 from datetime import timedelta
 import os
@@ -143,7 +143,7 @@ def write_to_csv(data):
     df["发生时间_dt"] = pd.to_datetime(df["发生时间"], format="%Y%m%d_%H%M%S", errors="coerce")
     hours = 48
     # 筛选与 time 相差不超过 24 小时的元组（绝对差值）
-    df_filtered = df[df["发生时间_dt"].apply(lambda t: abs(t - time) <= timedelta(hours=hours))]
+    df_filtered = df[df["发生时间_dt"].apply(lambda t: abs(t - time) <= timedelta(hours=hours))].copy()
 
     # 如果没有符合条件的行，直接返回
     if df_filtered.empty:
@@ -161,8 +161,8 @@ def write_to_csv(data):
         print("最大时间差（小时）:", max_diff)
         if max_diff > 1:
             print(f"存在距离超过{max_diff}小时的记录 ✅")
-            print('df_filtered',df_filtered)
-            print('pd.DataFrame(data)',pd.DataFrame(data))
+            print('历史记录：',df_filtered)
+            print('最新抓拍到的堆物/摆摊记录：', pd.DataFrame([data]))
             df_filtered = pd.concat([df_filtered, pd.DataFrame([data])], ignore_index=True)#data是一个字典，所以要把这个字典放进列表里，这样才会被识别成一条记录，新增1行。
             # 删除不需要的列
             df_filtered = df_filtered.drop(
@@ -184,13 +184,19 @@ def write_to_csv(data):
                     "处理备注": row.get("处理备注", "")
                 }
                 print("正在处理：",item)
-                get_data(item)
+                # 👇 这里加上防重复上报的公共方法闸门
+                if check_and_log_sixiang_weifa(item, TEMPORARY_RECORD, CHONGFU_TIME):
+                    get_data(item)
+                    print("✅ 未发现重复，成功推送到太极")
+                else:
+                    print(f"❌ 拦截推送：{CHONGFU_TIME}小时内已上报过地点 [{item['发生地点']}] 的堆放物品行为。")
                 break  # 终止循环，只执行一次
 
 
             # 读取SQLite 的数据（如果还没读）
             conn = sqlite3.connect(TEMPORARY_RECORD)
             cursor = conn.cursor()
+            # 删掉数据库所有相关条目
             for gid in df_filtered["工单编号"]:
                 cursor.execute("DELETE FROM wupin_tanwei WHERE 工单编号 = ?", (gid,))
             conn.commit()

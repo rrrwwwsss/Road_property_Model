@@ -2,6 +2,95 @@ import json
 import os
 import re
 from PIL import Image, ImageDraw
+import numpy as np
+from datetime import datetime, timedelta
+import sqlite3
+import pandas as pd
+
+
+def check_and_log_sixiang_weifa(data, db_path, chongfu_hours):
+    """
+    基于现有的 sixiang_weifa 表进行防重校验：
+    检查指定时间内是否已经上报过该地点的同类违法行为。
+    如果没有上报过，则将本次记录写入 sixiang_weifa 表，并返回 True（允许上报）。
+    如果已经上报过，则返回 False（拦截上报）。
+    """
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # 确保表存在（与原逻辑结构一致，没有框位置）
+    cursor.execute("""
+                   CREATE TABLE IF NOT EXISTS sixiang_weifa
+                   (
+                       工单编号
+                       TEXT,
+                       违法类型
+                       TEXT,
+                       发生地点
+                       TEXT,
+                       发生时间
+                       TEXT,
+                       处理状态
+                       TEXT,
+                       处理人
+                       TEXT,
+                       path
+                       TEXT,
+                       处理备注
+                       TEXT
+                   )
+                   """)
+    conn.commit()
+
+    # 读取历史记录并判断
+    history_pd = pd.read_sql_query("SELECT * FROM sixiang_weifa", conn)
+    data_time = datetime.strptime(data["发生时间"], "%Y%m%d_%H%M%S")
+
+    if not history_pd.empty:
+        history_pd["发生时间"] = pd.to_datetime(history_pd["发生时间"], format="%Y%m%d_%H%M%S", errors="coerce")
+        time_diff = timedelta(hours=chongfu_hours)
+
+        # 筛选同地点、同违法类型，且在防抖时间内
+        filtered_df = history_pd[
+            (history_pd["发生地点"] == data["发生地点"]) &
+            (history_pd["违法类型"] == data["违法类型"]) &
+            ((history_pd["发生时间"] - data_time).abs() <= time_diff)
+            ]
+
+        if not filtered_df.empty:
+            conn.close()
+            return False  # 近期已经上报过，拦截！
+
+    # ==========================================
+    # 如果没报过，准备写入 sixiang_weifa 表记账
+    # ==========================================
+    sqlite_data = data.copy()
+    sqlite_data.pop('other_data', None)
+
+    # ⚠️ 关键容错：由于堆放物品传入的 data 可能带 "框位置"，而 sixiang_weifa 没有这个列
+    # 我们在写入前必须剔除掉不在表结构里的列，否则会报错 "table has 8 columns but 9 values were supplied"
+    sqlite_data.pop('框位置', None)
+
+    placeholders = ', '.join(['?'] * len(sqlite_data))
+    keys = ', '.join(sqlite_data.keys())
+    values = list(sqlite_data.values())
+
+    def safe_sql_value(v):
+        if isinstance(v, (dict, list)):
+            return json.dumps(v, ensure_ascii=False)
+        elif isinstance(v, (np.integer, np.floating)):
+            return v.item()
+        elif pd.isna(v):
+            return None
+        return v
+
+    safe_values = [safe_sql_value(v) for v in values]
+    cursor.execute(f"INSERT INTO sixiang_weifa ({keys}) VALUES ({placeholders})", safe_values)
+    conn.commit()
+    conn.close()
+
+    return True  # 记录成功，允许发送
+
 # 从文本中安全解析出 [xmin, ymin, xmax, ymax] 的边框数据
 def safe_json_parse(output_text):
     print("大模型返回值：", output_text)
