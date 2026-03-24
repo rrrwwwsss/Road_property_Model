@@ -76,7 +76,10 @@ def pattern_recognition(question, image):
         match = re.search(r'\{.*?\}', response, re.S)
         if match:
             try:
-                result_data = json.loads(match.group(0))
+                json_str = match.group(0)
+                json_str = re.sub(r"/\*.*?\*/", "", json_str, flags=re.S)  # 去掉块注释
+                json_str = re.sub(r"//.*?$", "", json_str, flags=re.M)  # 去掉行注释
+                result_data = json.loads(json_str)
             except json.JSONDecodeError as e:
                 print(f"⚠️ JSON解析错误: {e}, 原始数据: {match.group(0)}")
     elif isinstance(response, list) and response and isinstance(response[0], str):
@@ -84,7 +87,10 @@ def pattern_recognition(question, image):
         match = re.search(r'\{.*?\}', response[0], re.S)
         if match:
             try:
-                result_data = json.loads(match.group(0))
+                json_str = match.group(0)
+                json_str = re.sub(r"/\*.*?\*/", "", json_str, flags=re.S)  # 去掉块注释
+                json_str = re.sub(r"//.*?$", "", json_str, flags=re.M)  # 去掉行注释
+                result_data = json.loads(json_str)
             except json.JSONDecodeError as e:
                 print(f"⚠️ JSON解析错误: {e}, 原始数据: {match.group(0)}")
     else:

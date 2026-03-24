@@ -58,6 +58,8 @@ def check_and_log_sixiang_weifa(data, db_path, chongfu_hours):
             ]
 
         if not filtered_df.empty:
+            print("重复线索(历史)：", filtered_df)
+            print("本次线索：", data)
             conn.close()
             return False  # 近期已经上报过，拦截！
 
