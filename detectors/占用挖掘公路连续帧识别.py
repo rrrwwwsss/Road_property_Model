@@ -10,7 +10,7 @@ from datetime import timedelta
 import os
 from services.从数据库获取图片 import *
 from services.查询许可数据库 import job
-
+from config.配置 import *
 def write_to_csv(data):
     # 【第一关：合法性校验】 查达梦许可库
     try:

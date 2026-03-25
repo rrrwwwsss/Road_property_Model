@@ -76,8 +76,8 @@ def insert_database(data):
         "REMARK": "处理备注",
         "LEVEL":"推送分级分类"
     }
-    import 数据库配置
-    if 数据库配置.IS_SUBMIT == True:
+    import config.数据库配置
+    if config.数据库配置.IS_SUBMIT == True:
         print("开始提交六项违法行为到数据库")
         # 先把六个违法行为存储到数据库中，后面就不用存了
         for k, v in VIOLATION_DICT.items():
@@ -94,7 +94,7 @@ def insert_database(data):
             except Exception as e:
                 print(e)
 
-        数据库配置.IS_SUBMIT = False  # 这样才修改了模块的全局变量
+        # config.数据库配置.IS_SUBMIT = False  # 这样才修改了模块的全局变量
     # 插入OFFSITE_WARNS_HB表
     offsiteWarnsHb = OffsiteWarnsHb(ID=OffsiteWarnsHb_id,
                                     ERROR_HB_ID=OffsiteIntellectErrorsHb_id,
@@ -137,8 +137,7 @@ def insert_database(data):
 
     #OFFSITE_EVIDENCE_CONSTANT 对这个表存储的是QUESTION_DATA的NEXT_LEVEL信息，因此要把其每个字段都当作一行输入数据库
 
-    import 数据库配置
-    if 数据库配置.IS_SUBMIT == True:
+    if config.数据库配置.IS_SUBMIT == True:
         print("开始提交六项违法行为到数据库")
         # 先把六个违法行为存储到数据库中，后面就不用存了
         for i, j in VIOLATION_DICT.items():
@@ -154,7 +153,7 @@ def insert_database(data):
                                                                   )
                 insert_object(offsiteEvidenceConstant, table_name='OFFSITE_EVIDENCE_CONSTANT')
                 indexs += 1
-
+        config.数据库配置.IS_SUBMIT = False
 
 
 if __name__ == '__main__':

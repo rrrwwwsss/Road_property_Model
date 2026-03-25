@@ -11,7 +11,7 @@ import os
 from detectors.给图像打马赛克 import apply_mosaic_on_polygon
 from services.查询许可数据库 import job
 from services.从数据库获取图片 import *
-
+from config.配置 import *
 def write_to_csv(data):
     # 【第一关：合法性校验】 查达梦许可库
     try:

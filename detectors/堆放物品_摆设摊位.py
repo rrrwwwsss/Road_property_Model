@@ -1,10 +1,12 @@
 from detectors.公共方法 import *
 from services.整合数据 import get_data
-from datetime import timedelta
+from datetime import timedelta, datetime
 import os
 import json
 import pandas as pd
 from services.从数据库获取图片 import *
+from config.配置 import *
+import sqlite3
 # 设置显示所有行和列
 pd.set_option('display.max_rows', None)       # 显示所有行
 pd.set_option('display.max_columns', None)    # 显示所有列
@@ -171,7 +173,7 @@ def write_to_csv(data):
             print("最终的该行为的历史记录表：",df_filtered)
             print("共计行数：", len(df_filtered))
 
-            print("开始往太极传数据")
+
             for _, row in df_filtered.iterrows():
                 item = {
                     "工单编号": row.get("工单编号", ""),
@@ -186,6 +188,7 @@ def write_to_csv(data):
                 print("正在处理：",item)
                 # 👇 这里加上防重复上报的公共方法闸门
                 if check_and_log_sixiang_weifa(item, TEMPORARY_RECORD, CHONGFU_TIME):
+                    print("开始往太极传数据")
                     get_data(item)
                     print("✅ 未发现重复，成功推送到太极")
                 else:
