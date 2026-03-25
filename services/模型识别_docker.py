@@ -13,9 +13,14 @@ def detect_frame(question, image_base64):
     # 这是把 Base64 内容包装成 Data URI（数据 URL）
     image_data_url = f"data:image/png;base64,{image_base64}"  # 注意前缀
     data = {
-        "model": "qwen2_5_vl",  # 使用的模型名称，这里是 Qwen2.5-VL (多模态，支持图文输入)
-        # "model": "qwenvl",
+        # "model": "qwen2_5_vl",  # 使用的模型名称，这里是 Qwen2.5-VL (多模态，支持图文输入)
+        "model": "Qwen3.5-VL-27B",
         "messages": [  # 对话历史，采用 Chat 格式
+            {
+                # 【新增】系统提示词，严厉限制它的输出格式
+                "role": "system",
+                "content": "You are a strict image analysis program. No matter what you see, you must and can only output valid JSON format. Under no circumstances are you allowed to output any introductory remarks, concluding remarks, English text, analysis processes, or thought processes."
+            },
             {
                 "role": "user",  # 角色，这里是用户
                 "content": [  # 输入的内容，可以是图片+文字的多模态输入
@@ -25,10 +30,10 @@ def detect_frame(question, image_base64):
                 ]
             }
         ],
-        "max_tokens": 1024,  # 最大输出 token 数，限制生成回复的长度
-        "do_sample": True,  # 是否启用采样（随机性），True 表示不是完全贪心搜索
+        "max_tokens": 1024,  # 限制长度
+        # "do_sample": True,  # 是否启用采样（随机性），True 表示不是完全贪心搜索
         "repetition_penalty": 1.1,  # 重复惩罚系数，>1 会惩罚模型重复的内容，这里 1.0 表示不做惩罚
-        "temperature": 0.4,  # 温度系数，控制生成的随机性。越接近 0 越确定，越大越随机，这里 0.01 表示几乎确定性输出
+        "temperature": 0.1, # 【修改】调低温度，让它变得极其确定理智，不再发散思维
         "top_p": 0.9,  # nucleus sampling 截断概率。取累计概率 ≤0.001 的 token 候选，非常严格
         "top_k": 50  # 只从概率最高的前 1 个 token 中选取 → 和 greedy search 很像
     }
@@ -37,7 +42,7 @@ def detect_frame(question, image_base64):
         response = requests.post(
             LIANTONG_MODEL,
             json=data,
-            timeout=60
+            timeout=120  # 【关键修改】把 60 改成 120 秒，给它足够的从容
         )
         response.raise_for_status()
         response_data = response.json()
