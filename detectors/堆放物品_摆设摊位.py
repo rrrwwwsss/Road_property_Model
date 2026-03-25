@@ -165,7 +165,7 @@ def write_to_csv(data):
             print(f"存在距离超过{max_diff}小时的记录 ✅")
             print('历史记录：',df_filtered)
             print('最新抓拍到的堆物/摆摊记录：', pd.DataFrame([data]))
-            df_filtered = pd.concat([df_filtered, pd.DataFrame([data])], ignore_index=True)#data是一个字典，所以要把这个字典放进列表里，这样才会被识别成一条记录，新增1行。
+            df_filtered = pd.concat([pd.DataFrame([data]), df_filtered], ignore_index=True)#data是一个字典，所以要把这个字典放进列表里，这样才会被识别成一条记录，新增1行。
             # 删除不需要的列
             df_filtered = df_filtered.drop(
                 columns=[col for col in ["框位置", "时间差_小时", "发生时间_dt"] if col in df_filtered.columns])
@@ -183,7 +183,8 @@ def write_to_csv(data):
                     "处理状态": row.get("处理状态", ""),
                     "处理人": row.get("处理人", ""),
                     "path": row.get("path", ""),
-                    "处理备注": row.get("处理备注", "")
+                    "处理备注": row.get("处理备注", ""),
+                    "other_data": row.get("other_data")  # 👈 加上这行
                 }
                 print("正在处理：",item)
                 # 👇 这里加上防重复上报的公共方法闸门

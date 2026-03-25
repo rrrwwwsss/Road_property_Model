@@ -60,6 +60,7 @@ def check_and_log_sixiang_weifa(data, db_path, chongfu_hours):
         if not filtered_df.empty:
             print("重复线索(历史)：", filtered_df)
             print("本次线索：", data)
+            print(chongfu_hours,'小时内已经上报过，拦截！')
             conn.close()
             return False  # 近期已经上报过，拦截！
 
@@ -90,7 +91,7 @@ def check_and_log_sixiang_weifa(data, db_path, chongfu_hours):
     cursor.execute(f"INSERT INTO sixiang_weifa ({keys}) VALUES ({placeholders})", safe_values)
     conn.commit()
     conn.close()
-
+    print(chongfu_hours,'小时内未推送过同样记录，允许发送')
     return True  # 记录成功，允许发送
 
 # 从文本中安全解析出 [xmin, ymin, xmax, ymax] 的边框数据
