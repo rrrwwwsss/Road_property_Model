@@ -1,0 +1,8 @@
+{
+  "wajue_prompt_path": "prompts/wajue.txt",
+  "gongbiao_prompt_path": "prompts/gongbiao.txt",
+  "jinggai_prompt_path": "prompts/jinggai.txt",
+  "xuangua_prompt_path": "prompts/xuangua.txt",
+  "duifang_prompt_path": "prompts/duifang.txt",
+  "baitai_prompt_path": "prompts/baitai.txt"
+}

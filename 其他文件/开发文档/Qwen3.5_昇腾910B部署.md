@@ -52,6 +52,10 @@ docker run -itd \
   -v /data:/data \
   vllm-ascend:qwen3_5-v0-a2 \
   bash
+  
+  
+# 重启容器
+docker restart Qwen3.5-VL-27B-Baitan-Container
 ```
 
 ---
@@ -74,17 +78,30 @@ cd /
 # 3. 配置 NPU 与 vLLM 环境变量
 export VLLM_USE_MODELSCOPE=False
 export PYTORCH_NPU_ALLOC_CONF=max_split_size_mb:256
-export VLLM_USE_V1=0
+#export VLLM_USE_V1=0
 
 # 4. 启动核心 API Server
-python3 -m vllm.entrypoints.openai.api_server \
+nohup python3 -m vllm.entrypoints.openai.api_server \
   --model /root/Models/Qwen3.5-VL-27B-Baitan-Merged \
   --tensor-parallel-size 2 \
-  --max-model-len 4096 \
+  --max-model-len 8192 \
   --trust-remote-code \
   --limit-mm-per-prompt.video 0 \
   --port 5359 \
-  --served-model-name Qwen3.5-VL-27B
+  --served-model-name Qwen3.5-VL-27B > /vllm.log 2>&1 &
+  
+nohup python3 -m vllm.entrypoints.openai.api_server \
+  --model /root/Models/Qwen3.5_35B_A3B \
+  --tensor-parallel-size 2 \
+  --max-model-len 4096 \
+  --trust-remote-code \
+  --gpu-memory-utilization 0.85 \
+  --enforce-eager \
+  --port 5359 \
+  --served-model-name Qwen3.5-VL-27B > /vllm.log 2>&1 &
+
+# 5.查看日志
+tail -f /vllm.log
 ```
 
 ### 3.2 核心启动参数解析
@@ -97,8 +114,9 @@ python3 -m vllm.entrypoints.openai.api_server \
 
 ---
 
-## 4. 客户端 API 调用 (Python 示例)
+## 4. 客户端 API 调用 
 
+### 1.Python 示例
 模型服务完全兼容 OpenAI Vision API 规范。针对工业级流水线，建议加入严格的 System Prompt，并适当放宽请求超时时间。
 
 ```python
@@ -144,6 +162,7 @@ def detect_frame(question, image_base64):
         print(f"[detect_frame] 调用异常: {type(e).__name__} - {e}")
         return '{"result": "错误"}'
 ```
-
----
-
+### 2.命令行调用
+```bash
+curl http://192.168.0.161:5359/v1/chat/completions -H "Content-Type: application/json" -d '{"model": "Qwen3.5-VL-27B", "messages": [{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": [{"type": "text", "text": "请介绍一下你自己"}]}]}'
+```

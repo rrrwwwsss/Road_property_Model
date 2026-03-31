@@ -11,6 +11,9 @@ services:
       - /data1/qwen2v/road_property_rightsmodel:/app/road_property_rightsmodel   # 挂载宿主机代码目录（改成你机器上的实际路径）
       - /data1/qwen2v/pic:/app/pic
       - /data1/qwen2v/road_property_rightsmodel/data:/app/road_property_rightsmodel/data
+      - /data1/qwen2v/wjr_test/screenshots:/app/screenshots
+      - /data1/qwen2v/wjr_test/切片:/app/qiepian
+
     environment:
       - TZ=Asia/Shanghai    # 设置时区
     restart: unless-stopped

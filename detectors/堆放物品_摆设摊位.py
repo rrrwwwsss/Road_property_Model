@@ -144,7 +144,7 @@ def write_to_csv(data):
     # 解析“发生时间”列为 datetime
     df["发生时间_dt"] = pd.to_datetime(df["发生时间"], format="%Y%m%d_%H%M%S", errors="coerce")
     hours = 48
-    # 筛选与 time 相差不超过 24 小时的元组（绝对差值）
+    # 筛选与 time 相差不超过 48 小时的元组（绝对差值）
     df_filtered = df[df["发生时间_dt"].apply(lambda t: abs(t - time) <= timedelta(hours=hours))].copy()
 
     # 如果没有符合条件的行，直接返回
