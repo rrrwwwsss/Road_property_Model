@@ -67,7 +67,7 @@ def process_images(
         camera_id : 摄像头id
     """
     if other_data is None:
-        other_data = []
+        other_data = {}
     action_name = list(action.keys())[0]
     # question: 自定义检测问题描述
     question = action[action_name]
@@ -144,7 +144,8 @@ def process_images(
 
         # 调用模型识别模块输入提示词进行图像的识别，返回识别结果output_text
         from services.模型识别_docker import pattern_recognition
-        output_text = pattern_recognition(question, image)
+        output_text,model_output = pattern_recognition(question, image)
+        other_data['model_output'] = model_output
 
         result_dict = safe_json_parse(output_text)
 
@@ -251,6 +252,7 @@ def process_images(
             print(f"★ 发现目标，已保存至 linux存放路径：{output_path}")
             matched_count += 1
             the_type = action_name
+
             data = {
                 "工单编号": filename,
                 "违法类型": the_type,

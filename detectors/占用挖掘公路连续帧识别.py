@@ -149,7 +149,7 @@ def process_images(
 
         # 调用模型识别模块输入提示词进行图像的识别，返回识别结果output_text
 
-        output_text = pattern_recognition(question, image)
+        output_text,model_output = pattern_recognition(question, image)
 
         result_dict = safe_json_parse(output_text)
 
@@ -209,7 +209,8 @@ def process_images(
         try:
             frame2, timestamp = capture_frame_from_camera(camera_id) or (None, None)
             if frame2 != None:
-                output_text = pattern_recognition(question, frame2)
+                output_text,model_output = pattern_recognition(question, frame2)
+                other_data['model_output'] = model_output
                 result_dict = safe_json_parse(output_text)
                 # 检查这一帧是否也是占掘路，若是就继续处理，若不是就退出
                 if result_dict["result"] == "no":
@@ -277,6 +278,7 @@ def process_images(
         print(f"★ 发现目标，已保存至 linux存放路径：{output_path}")
         matched_count += 1
         the_type = action_name
+
         data = {
             "工单编号": filename,
             "违法类型": the_type,

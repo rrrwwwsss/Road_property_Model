@@ -1,6 +1,8 @@
 import csv
 import os
+import sqlite3
 
+from config.配置 import TEMPORARY_RECORD
 from services.获取摄像头点位数据 import get_dianwei_data
 from config.数据库配置 import *
 from services.提交数据库 import insert_database
@@ -74,3 +76,78 @@ def get_data(model_data):
 
     if model_data['违法类型'] not in allowed_violations:
         insert_database(data)
+        commit_flag = True  # bool
+    else:
+        commit_flag = False
+        
+
+    # 额外将信息存储到数据库
+    print('存储进本地数据库')
+    # 额外字段
+    model_output_str = model_data['other_data']["model_output"]  # str
+
+
+    # 连接数据库
+    conn = sqlite3.connect(TEMPORARY_RECORD)
+    cursor = conn.cursor()
+
+    # 1. 创建表（如果不存在）
+    cursor.execute('''
+                   CREATE TABLE IF NOT EXISTS results
+                   (
+                       id
+                       INTEGER
+                       PRIMARY
+                       KEY
+                       AUTOINCREMENT,
+                       TJ_NAME
+                       TEXT,
+                       MEASURE
+                       TEXT,
+                       UNIT_CODE
+                       TEXT,
+                       工单编号
+                       TEXT
+                       UNIQUE,
+                       违法类型
+                       TEXT,
+                       发生地点
+                       TEXT,
+                       发生时间
+                       TEXT,
+                       图片路径
+                       TEXT,
+                       OffsiteRule_id
+                       TEXT,
+                       model_output
+                       TEXT,
+                       is_committed
+                       BOOLEAN
+                   )
+                   ''')
+
+    # 2. 插入数据
+    cursor.execute('''
+                   INSERT INTO results (TJ_NAME, MEASURE, UNIT_CODE, 工单编号, 违法类型,
+                                                  发生地点, 发生时间, 图片路径, OffsiteRule_id,
+                                                  model_output, is_committed)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   ''', (
+                       data["TJ_NAME"],
+                       data["MEASURE"],
+                       data["UNIT_CODE"],
+                       data["工单编号"],
+                       data["违法类型"],
+                       data["发生地点"],
+                       data["发生时间"],
+                       data["图片路径"],
+                       data["OffsiteRule_id"],
+                       model_output_str,
+                       int(commit_flag)  # SQLite 没有原生 BOOLEAN，用 0/1 存储
+                   ))
+
+    # 3. 提交并关闭
+    conn.commit()
+    conn.close()
+
+    print("✅ 数据已成功写入数据库！")

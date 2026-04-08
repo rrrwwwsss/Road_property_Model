@@ -279,7 +279,8 @@ def process_images(
         image = image_data
         # 调用模型识别模块输入提示词进行图像的识别，返回识别结果output_text
         from services.模型识别_docker import pattern_recognition
-        output_text = pattern_recognition(question,image)
+        output_text,model_output = pattern_recognition(question,image)
+        other_data['model_output'] = model_output
         # # 构建消息
         # messages = [
         #     {

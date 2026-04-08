@@ -78,7 +78,7 @@ cd /
 # 3. 配置 NPU 与 vLLM 环境变量
 export VLLM_USE_MODELSCOPE=False
 export PYTORCH_NPU_ALLOC_CONF=max_split_size_mb:256
-#export VLLM_USE_V1=0
+# export VLLM_USE_V1=0
 
 # 4. 启动核心 API Server
 nohup python3 -m vllm.entrypoints.openai.api_server \
@@ -102,6 +102,12 @@ nohup python3 -m vllm.entrypoints.openai.api_server \
 
 # 5.查看日志
 tail -f /vllm.log
+
+# 6.关闭进程
+pkill -9 python
+或者
+npu-smi info  查看进程
+kill -9 6625 6626  杀死对应进程ID
 ```
 
 ### 3.2 核心启动参数解析

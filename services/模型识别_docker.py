@@ -139,4 +139,4 @@ def pattern_recognition(question, image):
     else:
         print("response 类型未知:", type(response))
 
-    return result_data
+    return result_data,response
