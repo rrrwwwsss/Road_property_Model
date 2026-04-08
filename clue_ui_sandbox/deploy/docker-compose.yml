@@ -1,0 +1,22 @@
+﻿services:
+  backend:
+    image: clue-backend:1.0.0
+    container_name: clue-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend.env
+    volumes:
+      - /data/road/pic:/app/pic
+    ports:
+      - "8000:8000"
+
+  frontend:
+    image: clue-frontend:1.0.0
+    container_name: clue-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "6586:80"
+
+

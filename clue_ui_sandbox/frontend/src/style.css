@@ -1,0 +1,93 @@
+:root {
+  --topbar-blue-a: #0b3a73;
+  --topbar-blue-b: #0f4c94;
+  --sidebar-blue-a: #12345d;
+  --sidebar-blue-b: #173f70;
+  --sidebar-hover: #1f538f;
+  --sidebar-active: #2a65a7;
+  --page-bg: #f4f7fb;
+  --card-border: #dbe5f1;
+  --text-main: #1f2d3d;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  height: 100%;
+  background: var(--page-bg);
+  color: var(--text-main);
+}
+
+.layout-root {
+  height: 100%;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  background: linear-gradient(90deg, var(--topbar-blue-a), var(--topbar-blue-b));
+  color: #fff;
+  border-bottom: 1px solid #0a3363;
+}
+
+.system-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.collapse-btn {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.sidebar {
+  background: linear-gradient(180deg, var(--sidebar-blue-a), var(--sidebar-blue-b));
+  border-right: 1px solid #112f57;
+  transition: width 0.2s ease;
+}
+
+.menu {
+  border-right: none;
+  height: 100%;
+  background: transparent;
+}
+
+.menu .el-menu-item {
+  color: #d5e5fb;
+}
+
+.menu .el-menu-item:hover {
+  background: var(--sidebar-hover);
+}
+
+.menu .el-menu-item.is-active {
+  background: var(--sidebar-active);
+  color: #ffffff;
+}
+
+.main-panel {
+  padding: 16px;
+}
+
+.page-card {
+  background: #fff;
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
