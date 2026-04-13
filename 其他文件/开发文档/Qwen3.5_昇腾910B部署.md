@@ -76,7 +76,7 @@ docker exec -it Qwen3.5-VL-27B-Baitan-Container bash
 cd /
 
 # 3. 配置 NPU 与 vLLM 环境变量
-export VLLM_USE_MODELSCOPE=False
+`export VLLM_USE_MODELSCOPE=False`
 export PYTORCH_NPU_ALLOC_CONF=max_split_size_mb:256
 # export VLLM_USE_V1=0
 

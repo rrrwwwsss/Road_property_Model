@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --topbar-blue-a: #0b3a73;
   --topbar-blue-b: #0f4c94;
   --sidebar-blue-a: #12345d;
@@ -11,9 +11,7 @@
   font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 html,
 body,
@@ -24,14 +22,11 @@ body,
   color: var(--text-main);
 }
 
-.layout-root {
-  height: 100%;
-}
+.layout-root { height: 100%; }
 
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 18px;
   background: linear-gradient(90deg, var(--topbar-blue-a), var(--topbar-blue-b));
   color: #fff;
@@ -44,26 +39,41 @@ body,
   letter-spacing: 1px;
 }
 
-.collapse-btn {
-  border-color: rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
-
-.collapse-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-}
-
 .sidebar {
   background: linear-gradient(180deg, var(--sidebar-blue-a), var(--sidebar-blue-b));
   border-right: 1px solid #112f57;
   transition: width 0.2s ease;
 }
 
+.sidebar-tools {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 10px 6px;
+}
+
+.sidebar-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.sidebar-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.sidebar-icon {
+  display: inline-block;
+  font-size: 14px;
+  line-height: 1;
+  transform: translateY(-1px);
+}
+
 .menu {
   border-right: none;
-  height: 100%;
+  height: calc(100% - 48px);
   background: transparent;
 }
 
@@ -80,9 +90,7 @@ body,
   color: #ffffff;
 }
 
-.main-panel {
-  padding: 16px;
-}
+.main-panel { padding: 16px; }
 
 .page-card {
   background: #fff;
@@ -91,3 +99,18 @@ body,
   padding: 14px;
 }
 
+/* 表格线条增强（线索列表 / 首页统计表） */
+.page-card :deep(.el-table--border),
+.page-card :deep(.el-table--group) {
+  border-width: 2px;
+  border-color: #b8cae3;
+}
+
+.page-card :deep(.el-table td.el-table__cell),
+.page-card :deep(.el-table th.el-table__cell.is-leaf) {
+  border-bottom: 2px solid #b8cae3;
+}
+
+.page-card :deep(.el-table--border .el-table__cell) {
+  border-right: 2px solid #b8cae3;
+}

@@ -6,9 +6,10 @@
     env_file:
       - ./backend.env
     volumes:
-      - /data/road/pic:/app/pic
+      - /data1/qwen2v/pic:/app/pic
+      - /data1/qwen2v/road_property_rightsmodel/clue_ui_sandbox/backend/app:/app/app
     ports:
-      - "8000:8000"
+      - "6587:8000"
 
   frontend:
     image: clue-frontend:1.0.0
@@ -16,7 +17,11 @@
     restart: unless-stopped
     depends_on:
       - backend
+    volumes:
+      - /data1/qwen2v/road_property_rightsmodel/clue_ui_sandbox/frontend/dist:/usr/share/nginx/html
     ports:
       - "6586:80"
+
+
 
 

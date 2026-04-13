@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-card">
     <div class="dashboard-title">首页概览</div>
 
@@ -34,6 +34,17 @@
         <template #default="{ row }"><span class="c-rate">{{ row.committed_rate }}</span></template>
       </el-table-column>
     </el-table>
+
+    <div v-if="tab === 'location'" class="pager-wrap">
+      <el-pagination
+        v-model:current-page="locationPage"
+        v-model:page-size="locationPageSize"
+        background
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="byLocation.length"
+        :page-sizes="[10, 20, 50, 100]"
+      />
+    </div>
   </div>
 </template>
 
@@ -52,7 +63,16 @@ const summary = ref({ total: 0, uncommitted: 0, committed: 0, committed_rate: 0.
 const byViolation = ref([]);
 const byLocation = ref([]);
 const trend = ref({ dates: [], series: [] });
-const tableRows = computed(() => (tab.value === "violation" ? byViolation.value : byLocation.value));
+
+const locationPage = ref(1);
+const locationPageSize = ref(10);
+
+const tableRows = computed(() => {
+  if (tab.value === "violation") return byViolation.value;
+  const start = (locationPage.value - 1) * locationPageSize.value;
+  const end = start + locationPageSize.value;
+  return byLocation.value.slice(start, end);
+});
 
 const chartRef = ref(null);
 let chart = null;
@@ -96,13 +116,19 @@ async function loadTrend() {
   renderChart();
 }
 
-watch(tab, loadTables);
+watch(tab, () => {
+  if (tab.value === "location") {
+    locationPage.value = 1;
+  }
+});
+
 onMounted(async () => {
   await loadSummary();
   await loadTables();
   await loadTrend();
   window.addEventListener("resize", renderChart);
 });
+
 onBeforeUnmount(() => {
   window.removeEventListener("resize", renderChart);
   if (chart) chart.dispose();
@@ -124,5 +150,5 @@ onBeforeUnmount(() => {
 .c-uncommit { color: #d97706; font-weight: 600; }
 .c-commit { color: #059669; font-weight: 600; }
 .c-rate { color: #475569; font-weight: 600; }
+.pager-wrap { margin-top: 12px; display: flex; justify-content: flex-end; }
 </style>
-

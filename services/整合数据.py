@@ -79,59 +79,54 @@ def get_data(model_data):
         commit_flag = True  # bool
     else:
         commit_flag = False
-        
 
     # 额外将信息存储到数据库
     print('存储进本地数据库')
-    # 额外字段
-    model_output_str = model_data['other_data']["model_output"]  # str
 
+    # 提取额外字段
+    model_output_str = model_data['other_data'].get("model_output", "")  # str (使用 get 防报错)
+    belong_team_str = model_data['other_data'].get("belong_team", "")  # 新增：所属支队
 
     # 连接数据库
+    import sqlite3  # 如果上面没导入的话
     conn = sqlite3.connect(TEMPORARY_RECORD)
     cursor = conn.cursor()
 
-    # 1. 创建表（如果不存在）
+    # 1. 创建表（如果不存在，直接在建表语句里带上新字段，照顾全新的数据库）
     cursor.execute('''
                    CREATE TABLE IF NOT EXISTS results
                    (
-                       id
-                       INTEGER
-                       PRIMARY
-                       KEY
-                       AUTOINCREMENT,
-                       TJ_NAME
-                       TEXT,
-                       MEASURE
-                       TEXT,
-                       UNIT_CODE
-                       TEXT,
-                       工单编号
-                       TEXT
-                       UNIQUE,
-                       违法类型
-                       TEXT,
-                       发生地点
-                       TEXT,
-                       发生时间
-                       TEXT,
-                       图片路径
-                       TEXT,
-                       OffsiteRule_id
-                       TEXT,
-                       model_output
-                       TEXT,
-                       is_committed
-                       BOOLEAN
+                       id INTEGER PRIMARY KEY AUTOINCREMENT,
+                       TJ_NAME TEXT,
+                       MEASURE TEXT,
+                       UNIT_CODE TEXT,
+                       工单编号 TEXT UNIQUE,
+                       违法类型 TEXT,
+                       发生地点 TEXT,
+                       发生时间 TEXT,
+                       图片路径 TEXT,
+                       OffsiteRule_id TEXT,
+                       model_output TEXT,
+                       is_committed BOOLEAN,
+                       所属支队 TEXT
                    )
                    ''')
+    # 2. 动态检查旧表是否缺少新列，如果缺少则自动新增
+    cursor.execute("PRAGMA table_info(results)")
+    # table_info 返回的每行格式为: (cid, name, type, notnull, dflt_value, pk)
+    # 取出所有的列名 (索引为 1 的位置)
+    existing_columns = [col[1] for col in cursor.fetchall()]
 
+    if "所属支队" not in existing_columns:
+        print("检测到 results 表中缺少 '所属支队' 列，正在自动新增该列...")
+        cursor.execute("ALTER TABLE results ADD COLUMN 所属支队 TEXT")
     # 2. 插入数据
+    # 增加了 所属支队 字段和对应的占位符 ?
     cursor.execute('''
                    INSERT INTO results (TJ_NAME, MEASURE, UNIT_CODE, 工单编号, 违法类型,
-                                                  发生地点, 发生时间, 图片路径, OffsiteRule_id,
-                                                  model_output, is_committed)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                        发生地点, 发生时间, 图片路径, OffsiteRule_id,
+                                        model_output, is_committed, 所属支队)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                    ''', (
                        data["TJ_NAME"],
                        data["MEASURE"],
@@ -143,7 +138,8 @@ def get_data(model_data):
                        data["图片路径"],
                        data["OffsiteRule_id"],
                        model_output_str,
-                       int(commit_flag)  # SQLite 没有原生 BOOLEAN，用 0/1 存储
+                       int(commit_flag),  # SQLite 没有原生 BOOLEAN，用 0/1 存储
+                       belong_team_str  # 👈 新增传入的值
                    ))
 
     # 3. 提交并关闭

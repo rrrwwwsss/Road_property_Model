@@ -1,10 +1,9 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import os
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
-from typing import Optional
 
 from dotenv import load_dotenv
 
@@ -24,6 +23,18 @@ def _get_int(name: str, default: int) -> int:
         return int(value)
     except ValueError:
         return default
+
+
+def _find_repo_root() -> Path:
+    # Local workspace usually has .../clue_ui_sandbox/backend/app/core/config.py
+    # Container image usually has /app/app/core/config.py
+    p = Path(__file__).resolve()
+    if len(p.parents) >= 5:
+        return p.parents[4]
+    # Fallback for container path layout
+    if len(p.parents) >= 3:
+        return p.parents[2]
+    return Path.cwd()
 
 
 @dataclass(frozen=True)
@@ -67,7 +78,7 @@ class AppConfig:
 @lru_cache(maxsize=1)
 def get_config() -> AppConfig:
     _load_backend_dotenv()
-    repo_root = Path(__file__).resolve().parents[4]
+    repo_root = _find_repo_root()
     default_db = str(repo_root / "pic" / "database" / "wupin_tanwei_dabt.db")
 
     sqlite = SqliteConfig(

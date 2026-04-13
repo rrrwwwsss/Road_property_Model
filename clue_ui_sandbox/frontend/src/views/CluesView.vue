@@ -1,9 +1,15 @@
-<template>
+﻿<template>
   <div class="page-card">
     <div class="toolbar">
       <el-button :loading="loading" @click="loadClues">刷新</el-button>
       <el-switch v-model="onlyUncommitted" active-text="只看未提交" @change="onFilterChange" />
-      <el-input v-model="keyword" placeholder="搜索工单编号/违法类型/发生地点" clearable style="width: 320px" @keyup.enter="onFilterChange" />
+      <el-input
+        v-model="keyword"
+        placeholder="搜索工单编号/违法类型/发生地点"
+        clearable
+        style="width: 320px"
+        @keyup.enter="onFilterChange"
+      />
       <el-button @click="onFilterChange">搜索</el-button>
     </div>
 
@@ -25,18 +31,9 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" fixed="right" width="170">
+      <el-table-column label="操作" fixed="right" width="110">
         <template #default="{ row }">
           <el-button link type="primary" @click="openDetail(row)">详情</el-button>
-          <el-button
-            v-if="Number(row.is_committed) !== 1"
-            link
-            type="success"
-            :disabled="committingId === row.id"
-            @click="onCommit(row)"
-          >
-            提交
-          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -54,13 +51,19 @@
       />
     </div>
 
-    <ClueDetailDrawer v-model:visible="drawerVisible" :detail="detail" />
+    <ClueDetailDrawer
+      v-model:visible="drawerVisible"
+      :detail="detail"
+      :can-edit="Number(detail?.raw?.is_committed || 0) !== 1"
+      :editing="committingId === detail?.id"
+      @edit="onDrawerEdit"
+    />
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { commitClue, fetchClueDetail, fetchClues } from "../api/clues";
 import ClueDetailDrawer from "../components/ClueDetailDrawer.vue";
 
@@ -129,17 +132,41 @@ async function openDetail(row) {
   }
 }
 
-async function onCommit(row) {
-  committingId.value = row.id;
+async function doCommit(id, workOrderNo) {
   try {
-    await commitClue(row.id);
+    await ElMessageBox.confirm(
+      `确认提交该线索吗？\n工单编号：${workOrderNo || id}`,
+      "提交确认",
+      {
+        confirmButtonText: "确认提交",
+        cancelButtonText: "取消",
+        type: "warning"
+      }
+    );
+  } catch (_) {
+    return;
+  }
+
+  committingId.value = id;
+  try {
+    await commitClue(id);
     ElMessage.success("提交成功");
     await loadClues();
+    if (drawerVisible.value) {
+      detail.value = await fetchClueDetail(id);
+    }
   } catch (err) {
     ElMessage.error(err?.response?.data?.detail || err.message || "提交失败");
   } finally {
     committingId.value = null;
   }
+}
+
+async function onDrawerEdit(payload) {
+  const id = payload?.id;
+  const workOrderNo = payload?.raw?.["工单编号"];
+  if (!id) return;
+  await doCommit(id, workOrderNo);
 }
 
 onMounted(loadClues);
