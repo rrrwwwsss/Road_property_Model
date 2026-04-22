@@ -17,21 +17,6 @@ from utils.prompt_loader import load_wajue_prompts, load_jinggai_prompts, load_g
 # 关闭输出缓冲，解决打印堵塞问题
 sys.stdout.reconfigure(line_buffering=True)
 
-# 固定问题
-# 占用挖掘公路
-wajue_question = load_wajue_prompts()
-
-# 井盖缺失
-jinggai_question = load_jinggai_prompts()
-
-
-gongbiao_question = load_gongbiao_prompts()
-# 设置悬挂物
-xuangua_question = load_xuangua_prompts()
-
-wupin_question = load_duifang_prompts()
-
-baitan_question = load_baitai_prompts()
 
 # model_result = 'Output : If the above behavior can be identified, then the following result will be returned: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]}, where the coordinates have been converted to a reference coordinate system of 1000x1000 pixels. Otherwise, return {"result": "no"}.'
 # 更新 配置.py的变量(全局变量)
@@ -71,6 +56,8 @@ def run_loop():
 
     def gaopin():
         while True:
+            # 占用挖掘公路
+            wajue_question = load_wajue_prompts()
             try:
                 # wajue_list = updata_dianList("擅自占用、挖掘公路")
                 print("开始轮询擅自占用、挖掘公路", flush=True)
@@ -86,6 +73,7 @@ def run_loop():
 
     def zhongpin():
         while True:
+            wupin_question = load_duifang_prompts()
             try:
                 # duifang_list = updata_dianList("在公路上及公路用地范围内堆放物品")
                 print("开始轮询堆放物品", flush=True)
@@ -96,8 +84,7 @@ def run_loop():
             print("堆放物品点位已轮询一遍")
             time.sleep(60)
 
-
-
+            baitan_question = load_baitai_prompts()
             try:
                 # baitan_list = updata_dianList("在公路上及公路用地范围内摆摊设点")
                 print("开始轮询摆设摊位", flush=True)
@@ -110,6 +97,8 @@ def run_loop():
 
     def dipin():
         while True:
+            # 设置悬挂物
+            xuangua_question = load_xuangua_prompts()
             try:
                 # xuangua_list = updata_dianList("遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全")
                 print("开始轮询利用设施悬挂物", flush=True)
@@ -120,7 +109,8 @@ def run_loop():
             print("悬挂物点位已轮询一遍")
             time.sleep(60)
 
-
+            # 井盖缺失
+            jinggai_question = load_jinggai_prompts()
             try:
                 # jinggai_list = updata_dianList("在公路范围内擅自移动井盖")
                 print("开始轮询井盖移动或缺失", flush=True)
@@ -131,7 +121,7 @@ def run_loop():
             print("井盖缺失点位已轮询一遍")
             time.sleep(60)
 
-
+            gongbiao_question = load_gongbiao_prompts()
             try:
                 # gongbiao_list = updata_dianList("在公路用地范围内设置公路标志以外的其他标志")
                 print("开始轮询设置非公路标志", flush=True)

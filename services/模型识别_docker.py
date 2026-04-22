@@ -50,7 +50,7 @@ def detect_frame(question, image_base64):
         response = requests.post(
             LIANTONG_MODEL,
             json=data,
-            timeout=120  # 【关键修改】把 60 改成 120 秒，给它足够的从容
+            timeout=120
         )
         response.raise_for_status()
         response_data = response.json()
