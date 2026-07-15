@@ -74,6 +74,13 @@ docker build -t clue-frontend:1.0.0 -f clue_ui_sandbox/frontend/Dockerfile .
 ```bash
 docker save -o clue-ui-images-1.0.0.tar clue-backend:1.0.0 clue-frontend:1.0.0
 ```
+加载镜像文件：
+```bash
+# 加载镜像文件
+docker load -i clue-ui-images-1.0.0.tar
+# 或者使用
+docker load < clue-ui-images-1.0.0.tar
+```
 启动：
 
 ```bash

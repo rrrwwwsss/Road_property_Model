@@ -76,7 +76,7 @@ docker exec -it Qwen3.5-VL-27B-Baitan-Container bash
 cd /
 
 # 3. 配置 NPU 与 vLLM 环境变量
-`export VLLM_USE_MODELSCOPE=False`
+export VLLM_USE_MODELSCOPE=False
 export PYTORCH_NPU_ALLOC_CONF=max_split_size_mb:256
 # export VLLM_USE_V1=0
 
@@ -91,7 +91,7 @@ nohup python3 -m vllm.entrypoints.openai.api_server \
   --served-model-name Qwen3.5-VL-27B > /vllm.log 2>&1 &
   
 nohup python3 -m vllm.entrypoints.openai.api_server \
-  --model /root/Models/Qwen3.5_35B_A3B \
+  --model /root/Models/Qwen3.5-VL-27B \
   --tensor-parallel-size 2 \
   --max-model-len 4096 \
   --trust-remote-code \

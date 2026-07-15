@@ -15,7 +15,9 @@ def insert_object(obj: Any, table_name: str):
     values = list(data.values())
 
     sql = f"INSERT INTO offsite.{table_name} ({columns}) VALUES ({placeholders})"
-    print("sql",sql)
+    # ✅ 同时打印 SQL 和具体参数值
+    print(f"[SQL] {sql}")
+    print(f"[Params] {values}")
     conn = dmPython.connect(
         user=DB_CONFIG['user'],
         password=DB_CONFIG['password'],

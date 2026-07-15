@@ -4,7 +4,7 @@ Words related to "personal affairs" include:"Advertisement of **", "Vehicle Main
 Words related to "public affairs" include: 1) Words related to "transportation" (such as "Maximum Load of **", "Prohibition of **", "Drunk Driving of **", "Transportation of **", "Drive **", "Fasten Seat Belt", "Section of **", "Be Careful of **", etc.);
 2) Place names (such as Beijing, Shanghai, Xicheng District, Yao Guantun, Huangcun, etc.);
 3) Indicative words (such as "Parking Lot of **", "Gas Station of **", etc.)
-Note: There may be text annotations related to the road name in the upper left corner of the picture. These are not related to the recognition task, please ignore them! Do not recognize them as text on the sign! If the text in the picture is difficult to recognize due to the shooting angle, light, or blurriness, or if you are unsure whether the text comes from an unofficial source, please reply "no" in all cases.
+Note: There may be text annotations related to the road name in the upper left corner of the picture. These are not related to the recognition task, please ignore them! Do not recognize them as text on the sign! If the text in the picture is difficult to recognize due to the shooting angle, light, or blurriness, or if you are unsure whether the text comes from an unofficial source, please reply  {"result": "no"} in all cases.
 Output: If the text is of personal affairs nature, return: {"result": "yes",
 "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1]... ]},
 "Content": The extracted text content }

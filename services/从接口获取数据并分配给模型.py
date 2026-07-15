@@ -2,6 +2,7 @@ from detectors.占用挖掘公路连续帧识别 import process_images as proces
 from detectors.四项违法行为识别 import process_images as process_images2
 from detectors.堆放物品_摆设摊位 import process_images as process_images3
 from config.配置 import IMAGE_QIEPIAN_PATH, IMAGE_API
+from datetime import datetime, time
 from PIL import Image
 def load_image(path):
     try:
@@ -147,16 +148,31 @@ def chuli(question, output_folder):
 
                 frame = load_image(path)
 
-                # 调用动态匹配的函数
-                processor(
-                    frame,
-                    question,
-                    output_folder=output_folder,
-                    monitor_point=data.get('location'),
-                    camera_id=data.get('camera_id'),
-                    action_time = data.get('capture_time'),
-                    other_data = data
-                )
+                # 获取当前时间（建议直接使用系统时间或已有的时间获取方式）
+                now = datetime.now().time()
+
+                # 定义静默时段：21:45 ~ 次日 06:15
+                start_time = time(21, 45)
+                end_time = time(6, 15)
+
+                # 判断是否在静默时段内（跨午夜）
+                in_quiet_period = now >= start_time or now <= end_time
+
+                if not in_quiet_period:
+                    print(f"当前时间 {now.strftime('%H:%M')} 不在静默时段内，继续执行处理。")
+                    # 不在静默时段，正常执行
+                    processor(
+                        frame,
+                        question,
+                        output_folder=output_folder,
+                        monitor_point=data.get('location'),
+                        camera_id=data.get('camera_id'),
+                        action_time=data.get('capture_time'),
+                        other_data=data
+                    )
+                else:
+                    # 在静默时段内，跳过执行
+                    print(f"当前时间 {now.strftime('%H:%M')} 处于静默时段(21:45-06:15)，跳过执行。")
 
                 feedback_data = [image_name]
                 # 2. 提交反馈

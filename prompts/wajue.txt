@@ -26,9 +26,9 @@ This rule overrides all other criteria, as these scenes represent emergency resp
 
 1. Ignore large vehicles that are parked or driving within safe zones and not participating in construction.
 2. Ignore buildings, pedestrians, toll booths, and road dividers.
-3. Emergency Vehicles: As stated above, any presence of police or medical emergency vehicles = "no".
+3. Emergency Vehicles: As stated above, any presence of police or medical emergency vehicles =  {"result": "no"}.
 4. If the picture is unclear and affects your judgment, please ignore it.
 5. Ignoring normal road maintenance behaviors
-   If the image is too blurry, obscured, or poorly lit to make an accurate judgment, respond with **“no.”**
+   If the image is too blurry, obscured, or poorly lit to make an accurate judgment, respond with ** {"result": "no"}**
 
-Output : If the above behavior can be identified, then the following result will be returned: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]}, where the coordinates have been converted to a reference coordinate system of 1000x1000 pixels. Otherwise, return {"result": "no"}.'
+Output : If the above behavior can be identified, then the following result will be returned: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]}, , where `bounding_boxes` refers to the location where the digging behaviour occurred, rather than the vehicle’s position; the coordinates should be converted to a 1000x1000-pixel reference coordinate system. Otherwise, return {"result": "no"}.'

@@ -13,7 +13,7 @@ services:
       - /data1/qwen2v/road_property_rightsmodel/data:/app/road_property_rightsmodel/data
       - /data1/qwen2v/wjr_test/screenshots:/app/screenshots
       - /data1/qwen2v/wjr_test/切片:/app/qiepian
-
+      
     environment:
       - TZ=Asia/Shanghai    # 设置时区
     restart: unless-stopped
@@ -23,3 +23,10 @@ services:
 networks:
   htc-qwen2vl-network:
     external: true
+
+#  # 👇 新增日志限制配置
+# logging:
+#   driver: "json-file"
+#   options:
+#     max-size: "100m"   # 单个日志文件最大 100MB
+#     max-file: "3"      # 最多保留 3 个文件（总计最多 300MB）

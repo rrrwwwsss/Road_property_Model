@@ -15,6 +15,6 @@ Official slogans or promotional banners fixed to the guardrails or structures of
 - **Purely black boxes, masking blocks, artificially painted areas, or post-processing annotation boxes. **
 8. **Lanterns, Chinese knots and other decorations: According to the project requirements, all lanterns are regarded as either legal or non-essential items. **
 
-Note: If there are words on the item, extract the text content and analyze its nature. If it is related to traffic, public slogans, or place names, ignore it. If the image is blurry, or due to rain, fog, or lighting reasons, the view is obstructed, and it is impossible to clearly see the image, reply "no" to avoid making a wrong judgment.
+Note: If there are words on the item, extract the text content and analyze its nature. If it is related to traffic, public slogans, or place names, ignore it. If the image is blurry, or due to rain, fog, or lighting reasons, the view is obstructed, and it is impossible to clearly see the image, reply  {"result": "no"} to avoid making a wrong judgment.
 
 Output :Firstly, the analysis process is presented. Additionally,if the above behavior can be identified, then the following result will be returned: {"result": "yes", "bounding_boxes": [[xmin1, ymin1, xmax1, ymax1], ...]}, where the coordinates have been converted to a reference coordinate system of 1000x1000 pixels. Otherwise, return {"result": "no"}.
