@@ -34,6 +34,14 @@ def write_to_csv(data):
             if matched_addresses:
                 print("已经有许可信息，合法，不是违法行为，中止上报")
                 return None
+        elif data["违法类型"] == "遮挡公路附属设施或者利用公路附属设施架设管道、悬挂物品，可能危及公路安全":
+                    matched_addresses = [
+                        item for item in query_results.get("xuanguawu", [])
+                        if item.get("constructaddress") == data["发生地点"]
+                    ]
+                    if matched_addresses:
+                        print("已经有许可信息，合法，不是违法行为，中止上报")
+                        return None
     except Exception as e:
         print(f"校验许可 query_results 出错: {e}")
     # 【第二关：防重复上报校验】 查本地 SQLite

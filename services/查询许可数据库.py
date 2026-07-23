@@ -101,10 +101,12 @@ def job():
      # 调用测试函数
     query_results['feigongbiao'] = dameng_connection('设置非公路标志审批')
     query_results['zhanwagonglu'] = dameng_connection('占用、挖掘公路、公路用地或者使公路改线审批（普通）')
+    query_results['xuanguawu'] = dameng_connection('跨越、穿越公路及在公路用地范围内架设、埋设管线及电缆等设施或者利用公路桥梁、公路隧道、涵洞铺设电缆等设施许可')
     print(f"{current_time} 查询任务执行完成。")
     # 打印每个审批类型的结果
     print(f"设置非公路标志审批: {query_results['feigongbiao']}")
     print(f"占用、挖掘公路、公路用地或者使公路改线审批（普通）: {query_results['zhanwagonglu']}")
+    print(f"跨越、穿越公路及在公路用地范围内架设、埋设管线及电缆等设施或者利用公路桥梁、公路隧道、涵洞铺设电缆等设施许可: {query_results['xuanguawu']}")
     return query_results
 
 # def main():
