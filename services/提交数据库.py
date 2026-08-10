@@ -94,7 +94,10 @@ def insert_database(data):
                 print(offsiteRule)
                 insert_object(offsiteRule, table_name='OFFSITE_RULE')
             except Exception as e:
-                print(e)
+                print(f"异常类型: {type(e).__name__}")
+                print(f"异常消息: {e}")
+            # break  # 只插入一次
+        
 
         # config.数据库配置.IS_SUBMIT = False  # 这样才修改了模块的全局变量
     # 插入OFFSITE_WARNS_HB表
@@ -156,15 +159,17 @@ def insert_database(data):
                 insert_object(offsiteEvidenceConstant, table_name='OFFSITE_EVIDENCE_CONSTANT')
                 indexs += 1
         config.数据库配置.IS_SUBMIT = False
+            
+        
 
 
 if __name__ == '__main__':
     data = {
-        "TJ_NAME": "摆设摊位行为：是指在公路及其用地范围内擅自设置售卖摊位，占用道路资源，扰乱正常交通秩序，存在较大安全与管理风险。",#违法行为描述
-        "MEASURE": "C1900100", #职权编码
+        "TJ_NAME": "公路范围内擅自移动井盖",#违法行为描述
+        "MEASURE": "C1913400", #职权编码
         "UNIT_CODE": "110113",#辖区编码
         "工单编号": "G101京沈线K39+350下行富各庄_20250517_092339.jpg",
-        "违法类型": "摆设摊位",
+        "违法类型": "公路范围内擅自移动井盖",
         "发生地点": "G101京沈线K39+350下行富各庄",
         "发生时间": "20250517_092339",
         "图片路径": "http://10.212.160.162:5000/preview/baitan/camera_11000000001317193402_20250701_190708.jpg",

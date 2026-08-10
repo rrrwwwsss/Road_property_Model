@@ -39,6 +39,11 @@ def get_data(model_data):
         "图片路径": IMG_URL+model_data["path"].replace("/data1/qwen2v/pic/", ""),
         "OffsiteRule_id" : VIOLATION_DICT[model_data["违法类型"]],
     }
+    # 针对特定违法类型替换 OffsiteRule_id
+    if model_data["违法类型"] in ("在公路上及公路用地范围内堆放物品", "在公路上及公路用地范围内摆摊设点"):
+        data["OffsiteRule_id"] = VIOLATION_DICT['造成公路路面损坏、污染或者影响公路畅通']
+    if model_data["违法类型"] in ("在公路范围内擅自移动井盖"):
+        data["OffsiteRule_id"] = VIOLATION_DICT['公路范围内擅自移动井盖']
     # 写入csv备份
     # 写入的 CSV 文件路径
     csv_path = "result.csv"
