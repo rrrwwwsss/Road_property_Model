@@ -79,10 +79,30 @@ def get_data(model_data):
         '在公路用地范围内设置公路标志以外的其他标志'
     ]
 
-    if model_data['违法类型'] not in allowed_violations:
-        insert_database(data)
-        commit_flag = True  # bool
+    # ========== 新增：误判地点过滤（优先执行） ==========
+    skip_flag = False  # 标记是否跳过提交
+
+    # 规则1：堆放物品 + 排除地点
+    if model_data['违法类型'] == '在公路上及公路用地范围内堆放物品':
+        if model_data['发生地点'].str.contains('分水岭进京', case=False, regex=False, na=False):
+            print("该违法地点经常发生误判，不提交数据库。")
+            skip_flag = True
+
+    # 规则2：摆摊设点 + 排除地点
+    if model_data['违法类型'] == '在公路上及公路用地范围内摆摊设点':
+        if model_data['发生地点'].str.contains('G234兴阳线K134+810柏查子', case=False, regex=False, na=False):
+            print("该违法地点经常发生误判，不提交数据库。")
+            skip_flag = True
+
+    # ========== 原有逻辑（仅当未命中误判规则时才执行） ==========
+    if not skip_flag:
+        if model_data['违法类型'] not in allowed_violations:
+            insert_database(data)
+            commit_flag = True
+        else:
+            commit_flag = False
     else:
+        # 被误判规则拦截，不提交数据库，也不需要执行原有逻辑
         commit_flag = False
 
     # 额外将信息存储到数据库
