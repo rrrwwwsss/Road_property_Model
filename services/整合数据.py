@@ -84,16 +84,15 @@ def get_data(model_data):
 
     # 规则1：堆放物品 + 排除地点
     if model_data['违法类型'] == '在公路上及公路用地范围内堆放物品':
-        if model_data['发生地点'].str.contains('分水岭进京', case=False, regex=False, na=False):
+        if '分水岭进京' in model_data['发生地点']:
             print("该违法地点经常发生误判，不提交数据库。")
             skip_flag = True
 
     # 规则2：摆摊设点 + 排除地点
     if model_data['违法类型'] == '在公路上及公路用地范围内摆摊设点':
-        if model_data['发生地点'].str.contains('G234兴阳线K134+810柏查子', case=False, regex=False, na=False):
+        if 'G234兴阳线K134+810柏查子' in model_data['发生地点']:
             print("该违法地点经常发生误判，不提交数据库。")
             skip_flag = True
-
     # ========== 原有逻辑（仅当未命中误判规则时才执行） ==========
     if not skip_flag:
         if model_data['违法类型'] not in allowed_violations:
