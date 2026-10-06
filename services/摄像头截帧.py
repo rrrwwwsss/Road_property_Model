@@ -60,7 +60,36 @@ def close_video(invite_id):
         print(f"SSL验证错误: {ssl_err}")
     except requests.exceptions.RequestException as e:
         print(f"请求过程中发生异常: {e}")
-
+def is_frame_usable(frame, blur_threshold=100.0, dark_threshold=20, bright_threshold=235):
+    """
+    判断帧是否可用：
+    - 模糊：拉普拉斯方差低于阈值
+    - 过暗/过曝：灰度均值超出范围
+    - 纯色：灰度标准差过低
+    """
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    
+    # 1. 模糊检测
+    laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+    if laplacian_var < blur_threshold:
+        print(f"帧模糊（拉普拉斯方差={laplacian_var:.2f}），丢弃")
+        return False
+    
+    # 2. 过暗/过曝检测
+    mean_brightness = gray.mean()
+    if mean_brightness < dark_threshold:
+        print(f"帧过暗（均值={mean_brightness:.2f}），丢弃")
+        return False
+    if mean_brightness > bright_threshold:
+        print(f"帧过曝（均值={mean_brightness:.2f}），丢弃")
+        return False
+    
+    # 3. 纯色/无内容检测
+    if gray.std() < 10:
+        print(f"帧无内容（标准差={gray.std():.2f}），丢弃")
+        return False
+    
+    return True
 
 def capture_frame_from_camera(camera_id):
     """
@@ -132,7 +161,21 @@ def capture_frame_from_camera(camera_id):
                     frame = temp_frame  # 保留最新有效的帧
                 else:
                     print(f"警告：第 {i + 1} 帧读取失败")
+            # 2. 质量校验：不合格就继续往后读，最多重试 max_retries 次
+            max_retries = 10
+            retry = 0
+            while frame is not None and not is_frame_usable(frame) and retry < max_retries:
+                ret, temp_frame = cap.read()
+                if ret:
+                    frame = temp_frame
+                    retry += 1
+                else:
+                    print(f"重试第 {retry + 1} 次读取失败")
+                    break
 
+            if frame is None or not is_frame_usable(frame):
+                print("警告：未能获取到合格帧，返回最后一帧作为兜底")
+        # 这里可以选择返回 frame（兜底）或 None（放弃）
             print("成功截取一帧。")
             cap.release()  # 释放视频流资源
         else:
